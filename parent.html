@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>練習營聯絡簿</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：一本家長聯絡簿 — 綠色封面抬頭，下面一頁頁「欄位」由重點往細節排 */
+:root {
+  --paper: #EEF4F0; --sheet: #FFFFFF; --rule: #D3E1D8; --ink: #1C2A2F; --ink2: #56686C;
+  --cover: #1F7A5C; --cover2: #17614A; --cover-ink: #FFFFFF;
+  --pen: #CF3B2E; --hl: #F6D44A;
+  --g-bg: #D6F0DF; --g-fg: #17633A; --y-bg: #FBEDC0; --y-fg: #775300; --r-bg: #FADAD5; --r-fg: #A1261A;
+  --i-bg: #DCEAF6; --i-fg: #245E87; --none: #E7EDEA; --none-fg: #8A9A97;
+  --f-display: "LXGW WenKai TC", "Kaiti TC", "DFKai-SB", "Noto Sans TC", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #111A17; --sheet: #19241F; --rule: #2A3A33; --ink: #E5EEE9; --ink2: #9AB0A7;
+  --cover: #237F61; --cover2: #1A6650; --cover-ink: #F4FFF9; --pen: #FF6F61; --hl: #E2BE2E;
+  --g-bg: #1D3D2B; --g-fg: #7FDCA2; --y-bg: #3C3216; --y-fg: #F2CB5C; --r-bg: #46221E; --r-fg: #FF9A8F;
+  --i-bg: #1C3245; --i-fg: #8CC4EE; --none: #22302B; --none-fg: #6F837C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #111A17; --sheet: #19241F; --rule: #2A3A33; --ink: #E5EEE9; --ink2: #9AB0A7;
+  --cover: #237F61; --cover2: #1A6650; --cover-ink: #F4FFF9; --pen: #FF6F61; --hl: #E2BE2E;
+  --g-bg: #1D3D2B; --g-fg: #7FDCA2; --y-bg: #3C3216; --y-fg: #F2CB5C; --r-bg: #46221E; --r-fg: #FF9A8F;
+  --i-bg: #1C3245; --i-fg: #8CC4EE; --none: #22302B; --none-fg: #6F837C; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6 }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--cover) }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+button { font: inherit; color: inherit; cursor: pointer }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--hl); outline-offset: 2px }
+.num { font-variant-numeric: tabular-nums }
+
+/* 封面 */
+.cover { background: var(--cover); color: var(--cover-ink); padding-block: 18px 0 }
+.cover-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.cover h1 { font-family: var(--f-display); font-size: 28px; margin: 0; letter-spacing: .06em; text-wrap: balance }
+.cover .meta { font-size: 13px; opacity: .85; margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.icon-btn { background: var(--cover2); border: 0; border-radius: 8px; padding: 6px 12px; color: var(--cover-ink); font-size: 13px }
+.tabs { display: flex; gap: 6px; margin-top: 16px; overflow-x: auto }
+.tab { border: 0; background: transparent; color: var(--cover-ink); opacity: .75; padding: 10px 18px 12px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: 700; white-space: nowrap }
+.tab small { font-weight: 400; margin-left: 6px; opacity: .85 }
+.tab[aria-selected="true"] { background: var(--paper); color: var(--ink); opacity: 1 }
+
+.banner { margin-top: 16px; background: var(--y-bg); color: var(--y-fg); border-radius: 10px; padding: 10px 14px; font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
+.banner button { background: transparent; border: 1.5px solid currentColor; border-radius: 8px; padding: 2px 10px; font-size: 13px; color: inherit }
+
+main.wrap { padding-block: 16px 48px; display: grid; gap: 18px }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; min-width: 0 }
+.sheet > h2 { font-family: var(--f-display); font-size: 21px; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap }
+.sheet > h2 .hint { font-family: var(--f-body); font-size: 13px; color: var(--ink2); font-weight: 400 }
+.sub { color: var(--ink2); font-size: 13px; margin: 0 0 14px }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px }
+@media (max-width: 760px) { .row2 { grid-template-columns: 1fr } }
+
+/* 本週 */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden }
+.stat { padding: 12px 14px; border-right: 1px solid var(--rule) }
+.stat:last-child { border-right: 0 }
+.stat .lbl { font-size: 13px; color: var(--ink2) }
+.stat .val { font-size: 28px; font-weight: 700; line-height: 1.2 }
+.stat .val small { font-size: 15px; font-weight: 500; color: var(--ink2) }
+.stat .cmp { font-size: 12px; color: var(--ink2) }
+.up { color: var(--g-fg) } .down { color: var(--pen) }
+@media (max-width: 600px) { .stats { grid-template-columns: 1fr 1fr } .stat:nth-child(2) { border-right: 0 } .stat:nth-child(-n+2) { border-bottom: 1px solid var(--rule) } }
+
+.week-body { display: grid; grid-template-columns: 1fr 220px; gap: 18px; margin-top: 16px; align-items: end }
+@media (max-width: 600px) { .week-body { grid-template-columns: 1fr } }
+.strip-wrap { min-width: 0 }
+.strip { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 76px }
+.bar { border-radius: 4px 4px 0 0; min-height: 3px; position: relative }
+.bar.g { background: var(--g-fg) } .bar.y { background: var(--hl) } .bar.r { background: var(--pen) } .bar.z { background: var(--none) }
+.strip-x { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; font-size: 11px; color: var(--ink2); text-align: center; margin-top: 4px }
+.strip-x .today { color: var(--ink); font-weight: 700 }
+.legend { display: flex; gap: 12px; font-size: 12px; color: var(--ink2); margin-top: 8px; flex-wrap: wrap }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px }
+.trend svg { width: 100%; height: auto; display: block }
+.trend .cap { font-size: 12px; color: var(--ink2) }
+
+/* 提醒 */
+.alerts { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0 }
+.alert { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 12px; border-radius: 10px; align-items: start }
+.alert .dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px }
+.alert b { display: block; font-size: 15px }
+.alert span { font-size: 13px; color: var(--ink2) }
+.alert.red { background: var(--r-bg) } .alert.red .dot { background: var(--pen); color: var(--sheet) } .alert.red b { color: var(--r-fg) }
+.alert.yellow { background: var(--y-bg) } .alert.yellow .dot { background: var(--hl); color: #3A2A00 } .alert.yellow b { color: var(--y-fg) }
+.alert.info { background: var(--i-bg) } .alert.info .dot { background: var(--i-fg); color: var(--sheet) } .alert.info b { color: var(--i-fg) }
+.alert.green { background: var(--g-bg) } .alert.green .dot { background: var(--g-fg); color: var(--sheet) } .alert.green b { color: var(--g-fg) }
+
+/* 熱力圖 */
+.seg { display: inline-flex; border: 1.5px solid var(--rule); border-radius: 999px; overflow: hidden; font-size: 13px }
+.seg button { border: 0; background: transparent; padding: 4px 12px; color: var(--ink2) }
+.seg button[aria-pressed="true"] { background: var(--cover); color: var(--cover-ink) }
+.heat-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px }
+.heat { display: grid; gap: 12px }
+.subj { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: start }
+.subj-name { font-family: var(--f-display); font-size: 18px; font-weight: 700; padding-top: 10px }
+.cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; min-width: 0 }
+.cell { border: 2px solid transparent; border-radius: 10px; padding: 7px 8px; text-align: left; line-height: 1.3; min-width: 0 }
+.cell .ln { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.cell .pc { font-size: 20px; font-weight: 700 }
+.cell .nn { font-size: 11px; opacity: .8 }
+.cell.g { background: var(--g-bg); color: var(--g-fg) } .cell.y { background: var(--y-bg); color: var(--y-fg) }
+.cell.r { background: var(--r-bg); color: var(--r-fg) } .cell.f { background: var(--none); color: var(--none-fg) }
+.cell[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--hl) }
+.exam { margin-top: 14px; border: 1.5px dashed var(--rule); border-radius: 10px; padding: 12px 14px; font-size: 14px }
+.exam strong { font-size: 15px }
+.exam .ex-row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 6px }
+.exam .ex-row div b { font-size: 22px; display: block; line-height: 1.2 }
+.linkish { background: none; border: 0; color: var(--cover); text-decoration: underline; padding: 0; font-size: 13px }
+
+/* 基本 vs 延伸 */
+.lv-subj { margin-bottom: 12px }
+.lv-subj h3 { font-size: 14px; margin: 0 0 4px }
+.lv-row { display: grid; grid-template-columns: 56px 1fr 74px; gap: 8px; align-items: center; font-size: 13px; margin: 3px 0 }
+.track { background: var(--none); height: 12px; border-radius: 6px; overflow: hidden }
+.fill { height: 100%; border-radius: 6px }
+.fill.g { background: var(--g-fg) } .fill.y { background: var(--hl) } .fill.r { background: var(--pen) }
+.lv-row .v { text-align: right; color: var(--ink2) }
+.lv-row .v b { color: var(--ink) }
+
+/* 作答節奏 */
+.rush-big { font-size: 34px; font-weight: 700; line-height: 1.1 }
+.rush-cmp { display: grid; gap: 6px; margin-top: 12px }
+.small { font-size: 12px; color: var(--ink2); margin-top: 10px }
+
+/* 錯題本 */
+.wrong-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px }
+.wrong { border-left: 4px solid var(--pen); background: var(--paper); border-radius: 0 10px 10px 0; padding: 10px 14px; display: grid; gap: 4px }
+.wrong.fixed { border-left-color: var(--g-fg) }
+.wrong-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--ink2) }
+.pill { border-radius: 999px; padding: 1px 10px; font-size: 12px; font-weight: 700 }
+.pill.open { background: var(--r-bg); color: var(--r-fg) } .pill.fixed { background: var(--g-bg); color: var(--g-fg) }
+.wrong .q { font-size: 15px; font-weight: 500 }
+.wrong .ans { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px }
+.wrong .ans .picked { color: var(--pen) }
+.wrong .ans .picked s { text-decoration-thickness: 2px }
+.wrong .ans .right { color: var(--g-fg); font-weight: 700 }
+.empty { color: var(--ink2); font-size: 14px; padding: 8px 0 }
+
+/* 生活習慣 */
+.habit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+.habit div { background: var(--paper); border-radius: 10px; padding: 10px 12px }
+.habit b { display: block; font-size: 24px; line-height: 1.2 }
+.habit span { font-size: 12px; color: var(--ink2) }
+
+/* 設定 */
+.overlay { position: fixed; inset: 0; background: rgba(10, 20, 16, .5); display: grid; place-items: center; z-index: 20; padding: 16px }
+.dialog { background: var(--sheet); border-radius: 16px; padding: 22px; width: min(440px, 100%); display: grid; gap: 12px }
+.dialog h2 { font-family: var(--f-display); margin: 0; font-size: 22px }
+.dialog label { display: grid; gap: 4px; font-size: 13px; color: var(--ink2) }
+.dialog input { font: inherit; color: var(--ink); background: var(--paper); border: 1.5px solid var(--rule); border-radius: 8px; padding: 8px 10px; width: 100% }
+.dialog .btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap }
+.btn { border: 0; border-radius: 10px; padding: 8px 16px; font-weight: 700 }
+.btn.main { background: var(--cover); color: var(--cover-ink) }
+.btn.plain { background: var(--none); color: var(--ink) }
+.err { color: var(--pen); font-size: 13px; min-height: 1em }
+@media (prefers-reduced-motion: no-preference) { .bar, .fill { transition: height .3s, width .4s } }
+</style>
+
+<header class="cover">
+  <div class="wrap">
+    <div class="cover-top">
+      <h1>練習營聯絡簿</h1>
+      <div class="meta"><span id="updated"></span>
+        <button class="icon-btn" id="reload" type="button">重新整理</button>
+        <button class="icon-btn" id="openSet" type="button">連線設定</button>
+      </div>
+    </div>
+    <div id="bannerBox"></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<div class="overlay" id="setBox" hidden>
+  <form class="dialog" id="setForm">
+    <h2>連線設定</h2>
+    <p class="sub" style="margin:0">填一次就好，這台手機或電腦會記住。資料只會傳到你自己的 Google 試算表。</p>
+    <label for="cfgUrl">Apps Script 網址（…/exec）<input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
+    <label for="cfgKey">家庭密碼（和平板設定的一樣）<input id="cfgKey" type="password" autocomplete="off"></label>
+    <label for="cfgPin">家長密碼（生活習慣的 4 位數字）<input id="cfgPin" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+    <div class="err" id="setErr"></div>
+    <div class="btns">
+      <button class="btn plain" type="button" id="useDemo">先看示範資料</button>
+      <button class="btn main" type="submit">連線</button>
+    </div>
+  </form>
+</div>
+
+<script>
+/* ===== 提醒規則（和 Dashboard.gs 同一份） ===== */
+function dbDiffDays(a, b) { function u(s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); } return Math.round((u(b) - u(a)) / 86400000); }
+function dbPct(ok, n) { return n ? Math.round(ok / n * 100) : null; }
+function dbAlerts(k, today) {
+  var out = [];
+  if (!k.lastDay) { out.push({ lv: 'info', title: '還沒有作答紀錄', detail: '小朋友在練習營答題後，這裡就會開始出現資料。' }); return out; }
+  var idle = dbDiffDays(k.lastDay, today);
+  if (idle >= 3) out.push({ lv: 'yellow', title: '已經 ' + idle + ' 天沒有練習', detail: '最後一次練習是 ' + k.lastDay.slice(5).replace('-', '/') + '。' });
+  k.lessons.filter(function (l) { return l.rn >= 5 && l.rok / l.rn < 0.6; })
+    .sort(function (a, b) { return a.rok / a.rn - b.rok / b.rn; }).slice(0, 3)
+    .forEach(function (l) { out.push({ lv: 'red', title: l.subject + '「' + l.lesson + '」最近 ' + l.rn + ' 題只對 ' + dbPct(l.rok, l.rn) + '%', detail: '建議先陪他重看課本這一課，再回練習營重做這課的題目。' }); });
+  Object.keys(k.levels).forEach(function (s) {
+    var lv = k.levels[s], b = null, e = null;
+    Object.keys(lv).forEach(function (n) { if (n.indexOf('基本') >= 0) b = lv[n]; if (n.indexOf('延伸') >= 0) e = lv[n]; });
+    if (b && e && b.n >= 5 && e.n >= 5 && b.ok / b.n - e.ok / e.n >= 0.2)
+      out.push({ lv: 'yellow', title: s + '：基本題 ' + dbPct(b.ok, b.n) + '%，延伸題只有 ' + dbPct(e.ok, e.n) + '%', detail: '記住了，但還不太會應用。可以請他用自己的話說說題目在問什麼。' });
+  });
+  var open = k.wrongs.filter(function (w) { return !w.lastOk; }).length;
+  if (open) out.push({ lv: 'yellow', title: '有 ' + open + ' 題反覆答錯，還沒訂正', detail: '看錯題本裡他選了什麼，就能分辨是粗心還是觀念不清楚。' });
+  var r = k.rush;
+  if (r.measured >= 20 && r.fast / r.measured >= 0.25)
+    out.push({ lv: 'red', title: '本週有 ' + dbPct(r.fast, r.measured) + '% 的題目在 3 秒內答完', detail: '這些題目只對 ' + dbPct(r.fastOk, r.fast) + '%，可能在快速點過去拿金幣。' });
+  if (k.habit && (k.habit.pendingReq || k.habit.pendingRedeem))
+    out.push({ lv: 'info', title: '生活習慣有 ' + (k.habit.pendingReq + k.habit.pendingRedeem) + ' 件等你確認', detail: '貼紙申請 ' + k.habit.pendingReq + ' 件、兌換獎勵 ' + k.habit.pendingRedeem + ' 件，請到練習營的家長模式處理。' });
+  if (k.week.n >= 20 && k.prev.n >= 20) {
+    var d = dbPct(k.week.ok, k.week.n) - dbPct(k.prev.ok, k.prev.n);
+    if (d >= 10) out.push({ lv: 'green', title: '正確率比上週進步 ' + d + ' 分', detail: '可以具體稱讚他進步的地方。' });
+  }
+  if (!out.length) out.push({ lv: 'green', title: '這週沒有需要特別注意的地方', detail: '維持現在的節奏就好。' });
+  var rank = { red: 0, yellow: 1, info: 2, green: 3 };
+  return out.sort(function (a, b) { return rank[a.lv] - rank[b.lv]; });
+}
+
+/* ===== 小工具 ===== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('pc-parent-' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('pc-parent-' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const tone = p => p == null ? 'f' : p >= 85 ? 'g' : p >= 60 ? 'y' : 'r';
+const SUBJ_ORDER = ['國語', '數學', '自然', '社會'];
+const CN = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+function cnNum(s) {
+  if (/^\d+$/.test(s)) return +s;
+  if (s === '十') return 10;
+  if (s[0] === '十') return 10 + (CN[s[1]] || 0);
+  const i = s.indexOf('十');
+  if (i > 0) return CN[s[0]] * 10 + (CN[s[i + 1]] || 0);
+  return CN[s] || 0;
+}
+function lessonCmp(a, b) {
+  const ka = (String(a).match(/\d+|[一二三四五六七八九十]+/g) || []).map(cnNum);
+  const kb = (String(b).match(/\d+|[一二三四五六七八九十]+/g) || []).map(cnNum);
+  for (let i = 0; i < Math.max(ka.length, kb.length); i++) { const d = (ka[i] || 0) - (kb[i] || 0); if (d) return d; }
+  return String(a).localeCompare(String(b), 'zh-Hant');
+}
+function subjCmp(a, b) { const ia = SUBJ_ORDER.indexOf(a), ib = SUBJ_ORDER.indexOf(b); return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib) || a.localeCompare(b, 'zh-Hant'); }
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+function wd(ds) { const p = ds.split('-'); return WD[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()]; }
+
+/* ===== 示範資料（沒有連線時才會出現） ===== */
+function makeDemo() {
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const today = new Date().toISOString().slice(0, 10);
+  const add = (ds, n) => { const p = ds.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10); };
+  function kid(id, name, grade, term, plan, weak, wrongs, rushFast, extGap, habit) {
+    const lessons = [], levels = {};
+    Object.keys(plan).forEach(s => plan[s].forEach((l, i) => {
+      if (rnd() < 0.12 && i > 0) return;
+      const n = 6 + Math.floor(rnd() * 26), base = weak.includes(s + l) ? 0.42 + rnd() * 0.14 : 0.66 + rnd() * 0.3;
+      const ok = Math.round(n * base), rn = Math.min(10, n), rok = Math.max(0, Math.min(rn, Math.round(rn * base + (rnd() - 0.5) * 2)));
+      const bn = Math.round(n * 0.6), en = n - bn, eAcc = Math.max(0.2, base - extGap * rnd() - (extGap ? 0.12 : 0));
+      const lv = { 基本題: { n: bn, ok: Math.min(bn, Math.round(bn * Math.min(1, base + 0.08))) }, 延伸題: { n: en, ok: Math.round(en * eAcc) } };
+      lessons.push({ subject: s, lesson: l, unit: '', n, ok, rn, rok, last: add(today, -Math.floor(rnd() * 20)), levels: lv });
+      const S = levels[s] || (levels[s] = {});
+      Object.keys(lv).forEach(k => { const x = S[k] || (S[k] = { n: 0, ok: 0 }); x.n += lv[k].n; x.ok += lv[k].ok; });
+    }));
+    const daily = []; let wn = 0, wok = 0, wdays = 0, pn = 0, pok = 0, pdays = 0;
+    for (let i = 13; i >= 0; i--) {
+      const n = rnd() < 0.25 ? 0 : 8 + Math.floor(rnd() * 30), ok = Math.round(n * (0.62 + rnd() * 0.3));
+      daily.push({ day: add(today, -i), n, ok });
+      if (i <= 6) { wn += n; wok += ok; if (n) wdays++; } else { pn += n; pok += ok; if (n) pdays++; }
+    }
+    const weeks = [];
+    for (let j = 7; j >= 0; j--) { const n = 40 + Math.floor(rnd() * 90); weeks.push({ start: add(today, -6 - 7 * j), n, ok: Math.round(n * (0.6 + (7 - j) * 0.02 + rnd() * 0.08)) }); }
+    weeks[7] = { start: add(today, -6), n: wn, ok: wok };
+    const measured = Math.round(wn * 0.85), fast = Math.round(measured * rushFast);
+    return {
+      id, name, grade, term, termMatched: true, coins: 380 + Math.floor(rnd() * 400), xp: 1200, medals: 6, practiceDays: 23,
+      lastDay: today, week: { n: wn, ok: wok, days: wdays, min: Math.round(wn * 0.45), secN: measured }, prev: { n: pn, ok: pok, days: pdays, min: Math.round(pn * 0.45), secN: pn },
+      daily, weeks, lessons, levels, wrongs,
+      rush: { measured, fast, fastOk: Math.round(fast * 0.38), normN: measured - fast, normOk: Math.round((measured - fast) * 0.79) },
+      habit
+    };
+  }
+  const big = kid('demo1', '大寶', 6, '六上',
+    { 國語: ['第一課', '第二課', '第三課'], 數學: ['第1單元', '第2單元', '第3單元', '第4單元'], 自然: ['1-1', '1-2', '1-3'], 社會: ['第1課', '第2課', '第3課'] },
+    ['數學第3單元', '自然1-2'],
+    [
+      { subject: '自然', lesson: '1-2', q: '冷鋒通過之後，氣溫通常會有什麼變化？', answer: '下降', chosen: '上升', n: 3, wrong: 2, lastOk: false },
+      { subject: '數學', lesson: '第3單元', q: '3/4 ÷ 1/2 = ?', answer: '1又1/2', chosen: '3/8', n: 4, wrong: 3, lastOk: false },
+      { subject: '國語', lesson: '第三課', q: '〈客至〉這首詩的作者是誰？', answer: '杜甫', chosen: '李白', n: 3, wrong: 2, lastOk: true },
+      { subject: '自然', lesson: '1-1', q: '颱風中心附近雲量很少、風雨較小的地方叫做什麼？', answer: '颱風眼', chosen: '颱風尾', n: 2, wrong: 2, lastOk: false }
+    ], 0.08, 0.35, { stickers: 14, earned: 26, pendingReq: 2, pendingRedeem: 0 });
+  const small = kid('demo2', '小寶', 3, '三上',
+    { 國語: ['第一課', '第二課', '第三課', '第四課', '第五課', '第六課'], 數學: ['第1單元', '第2單元', '第3單元'], 自然: ['1-1', '1-2', '1-3', '2-1', '2-2'], 社會: ['第1課', '第2課'] },
+    ['國語第三課', '數學第2單元'],
+    [
+      { subject: '數學', lesson: '第2單元', q: '1000 − 368 = ?', answer: '632', chosen: '742', n: 4, wrong: 3, lastOk: false },
+      { subject: '自然', lesson: '2-2', q: '兩個磁鐵的 N 極靠在一起，會發生什麼事？', answer: '互相排斥', chosen: '互相吸引', n: 3, wrong: 2, lastOk: true },
+      { subject: '國語', lesson: '第四課', q: '小丑魚住在海葵裡，最主要的好處是什麼？', answer: '可以躲避敵人', chosen: '可以找到食物', n: 3, wrong: 2, lastOk: false }
+    ], 0.31, 0.08, { stickers: 9, earned: 21, pendingReq: 1, pendingRedeem: 1 });
+  return { generated: Date.now(), today, kids: [big, small] };
+}
+
+/* ===== 狀態 ===== */
+let data = null, demo = false, demoWhy = '';
+let kidIdx = store.get('kid', 0);
+let basis = store.get('basis', 'recent');
+let onlyOpen = false;
+
+function cfg() { return store.get('cfg', { url: '', key: '', pin: '' }); }
+
+async function load() {
+  const c = cfg();
+  if (!c.url) return useDemo('還沒有連線到你的試算表，下面是示範資料。');
+  $('updated').textContent = '讀取中…';
+  try {
+    const res = await fetch(c.url, { method: 'POST', body: JSON.stringify({ key: c.key, pin: c.pin, action: 'dashboard' }) });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || '讀取失敗');
+    data = j.data; demo = false; demoWhy = '';
+    render();
+  } catch (e) {
+    const why = e instanceof TypeError ? '連不到 Apps Script（這個預覽頁面不能連外，請用放在 GitHub Pages 的 parent.html）' : e.message;
+    useDemo('讀取失敗：' + why + '。下面先顯示示範資料。');
+  }
+}
+function useDemo(why) { data = makeDemo(); demo = true; demoWhy = why; render(); }
+
+/* ===== 畫面 ===== */
+function render() {
+  if (kidIdx >= data.kids.length) kidIdx = 0;
+  const k = data.kids[kidIdx];
+  const d = new Date(data.generated);
+  $('updated').textContent = (demo ? '示範資料・' : '更新於 ') + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  $('bannerBox').innerHTML = demo ? `<div class="banner"><span>${esc(demoWhy)}</span><button type="button" onclick="openSettings()">去連線</button></div>` : '';
+  $('tabs').innerHTML = data.kids.map((x, i) => `<button class="tab" role="tab" type="button" aria-selected="${i === kidIdx}" data-i="${i}">${esc(x.name)}<small>${esc(x.term)}</small></button>`).join('');
+  if (!k) { $('main').innerHTML = '<section class="sheet"><p class="empty">試算表裡還沒有營員。</p></section>'; return; }
+  $('main').innerHTML = [weekSheet(k), alertSheet(k), heatSheet(k), `<div class="row2">${levelSheet(k)}${rushSheet(k)}</div>`, wrongSheet(k), habitSheet(k)].join('');
+}
+
+function delta(a, b, unit) {
+  if (b == null) return '';
+  const d = a - b;
+  if (!d) return `<span class="cmp">和上週一樣</span>`;
+  return `<span class="cmp">上週 ${b}${unit}　<span class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'}${Math.abs(d)}</span></span>`;
+}
+
+function weekSheet(k) {
+  const w = k.week, p = k.prev, wa = dbPct(w.ok, w.n), pa = dbPct(p.ok, p.n);
+  const max = Math.max(10, ...k.daily.map(x => x.n));
+  const bars = k.daily.map(x => { const a = dbPct(x.ok, x.n); return `<div class="bar ${x.n ? tone(a) : 'z'}" style="height:${x.n ? Math.max(6, x.n / max * 100) : 4}%" title="${x.day.slice(5)}：${x.n} 題${x.n ? '，對 ' + a + '%' : ''}"></div>`; }).join('');
+  const xs = k.daily.map((x, i) => `<span class="${i === 13 ? 'today' : ''}">${i === 13 ? '今' : wd(x.day)}</span>`).join('');
+  return `<section class="sheet" aria-labelledby="h-week">
+    <h2 id="h-week">本週概況 <span class="hint">最近 7 天</span></h2>
+    <div class="stats num">
+      <div class="stat"><div class="lbl">練習天數</div><div class="val">${w.days}<small> / 7 天</small></div>${delta(w.days, p.days, ' 天')}</div>
+      <div class="stat"><div class="lbl">作答題數</div><div class="val">${w.n}<small> 題</small></div>${delta(w.n, p.n, ' 題')}</div>
+      <div class="stat"><div class="lbl">正確率</div><div class="val">${wa == null ? '—' : wa + '<small>%</small>'}</div>${wa != null && pa != null ? delta(wa, pa, '%') : ''}</div>
+      <div class="stat"><div class="lbl">專心作答時間</div><div class="val">${w.secN ? '約 ' + w.min : '—'}<small> 分</small></div>${w.secN && p.secN ? delta(w.min, p.min, ' 分') : ''}</div>
+    </div>
+    <div class="week-body">
+      <div class="strip-wrap">
+        <div class="strip" aria-label="最近 14 天每天的作答題數">${bars}</div>
+        <div class="strip-x num">${xs}</div>
+        <div class="legend"><span><i style="background:var(--g-fg)"></i>對 85% 以上</span><span><i style="background:var(--hl)"></i>60–84%</span><span><i style="background:var(--pen)"></i>不到 60%</span><span>柱子高度＝題數</span></div>
+      </div>
+      ${trend(k.weeks)}
+    </div>
+  </section>`;
+}
+
+function trend(weeks) {
+  const W = 220, H = 92, pad = { l: 30, r: 10, t: 10, b: 20 };
+  const pts = weeks.map((w, i) => ({ i, a: dbPct(w.ok, w.n) })).filter(p => p.a != null);
+  if (pts.length < 2) return `<div class="trend"><div class="cap">每週正確率</div><p class="empty">累積兩週以上就會出現趨勢線。</p></div>`;
+  const x = i => pad.l + i * (W - pad.l - pad.r) / 7, y = a => pad.t + (100 - a) / 50 * (H - pad.t - pad.b);
+  const yv = a => y(Math.max(50, a));
+  const line = pts.map(p => `${x(p.i).toFixed(1)},${yv(p.a).toFixed(1)}`).join(' ');
+  const area = `${x(pts[0].i).toFixed(1)},${(H - pad.b)} ${line} ${x(pts[pts.length - 1].i).toFixed(1)},${H - pad.b}`;
+  const last = pts[pts.length - 1];
+  const grid = [50, 75, 100].map(a => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(a)}" y2="${y(a)}" stroke="var(--rule)" stroke-width="1"/><text x="${pad.l - 4}" y="${y(a) + 4}" text-anchor="end" font-size="10" fill="var(--ink2)">${a}%</text>`).join('');
+  return `<div class="trend"><div class="cap">最近 8 週正確率</div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="最近 8 週正確率，本週 ${last.a}%">
+      ${grid}
+      <polygon points="${area}" fill="var(--g-bg)"/>
+      <polyline points="${line}" fill="none" stroke="var(--cover)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${x(last.i)}" cy="${yv(last.a)}" r="4.5" fill="var(--cover)" stroke="var(--sheet)" stroke-width="2"/>
+      <text x="${x(0)}" y="${H - 5}" font-size="10" fill="var(--ink2)">8 週前</text>
+      <text x="${x(7)}" y="${H - 5}" font-size="10" fill="var(--ink2)" text-anchor="end">本週 ${last.a}%</text>
+    </svg></div>`;
+}
+
+function alertSheet(k) {
+  const mark = { red: '!', yellow: '!', info: 'i', green: '✓' };
+  const list = dbAlerts(k, data.today).map(a => `<li class="alert ${a.lv}"><div class="dot" aria-hidden="true">${mark[a.lv]}</div><div><b>${esc(a.title)}</b><span>${esc(a.detail)}</span></div></li>`).join('');
+  return `<section class="sheet" aria-labelledby="h-alert"><h2 id="h-alert">需要注意</h2><p class="sub">重要的排在前面。</p><ul class="alerts">${list}</ul></section>`;
+}
+
+function examKey(k) { return 'exam-' + k.id + '-' + k.term; }
+
+function heatSheet(k) {
+  const sel = new Set(store.get(examKey(k), []));
+  const subs = [...new Set(k.lessons.map(l => l.subject))].sort(subjCmp);
+  const rows = subs.map(s => {
+    const ls = k.lessons.filter(l => l.subject === s).sort((a, b) => lessonCmp(a.lesson, b.lesson));
+    const cells = ls.map(l => {
+      const n = basis === 'recent' ? l.rn : l.n, ok = basis === 'recent' ? l.rok : l.ok, p = dbPct(ok, n);
+      const t = n < 3 ? 'f' : tone(p), key = s + '|' + l.lesson;
+      return `<button type="button" class="cell ${t}" data-cell="${esc(key)}" aria-pressed="${sel.has(key)}" title="${esc(s + ' ' + l.lesson)}：${ok}/${n} 題">
+        <div class="ln">${esc(l.lesson)}</div><div class="pc num">${n < 3 ? '—' : p + '%'}</div><div class="nn num">${n < 3 ? '題數太少' : '共做 ' + l.n + ' 題'}</div></button>`;
+    }).join('');
+    return `<div class="subj"><div class="subj-name">${esc(s)}</div><div class="cells">${cells}</div></div>`;
+  }).join('');
+  const note = k.termMatched ? `只看 ${esc(k.term)} 的題目。` : `找不到 ${esc(k.term)} 的紀錄，先顯示全部紀錄。`;
+  return `<section class="sheet" aria-labelledby="h-heat">
+    <h2 id="h-heat">各課掌握度</h2>
+    <p class="sub">${note}點格子可以圈出考試範圍。</p>
+    <div class="heat-tools">
+      <div class="seg" role="group" aria-label="正確率怎麼算">
+        <button type="button" data-basis="recent" aria-pressed="${basis === 'recent'}">最近 10 題</button>
+        <button type="button" data-basis="all" aria-pressed="${basis === 'all'}">全部紀錄</button>
+      </div>
+      <div class="legend" style="margin:0"><span><i style="background:var(--g-bg);outline:1px solid var(--g-fg)"></i>85% 以上</span><span><i style="background:var(--y-bg);outline:1px solid var(--y-fg)"></i>60–84%</span><span><i style="background:var(--r-bg);outline:1px solid var(--r-fg)"></i>不到 60%</span></div>
+    </div>
+    ${rows ? `<div class="heat">${rows}</div>` : '<p class="empty">這學期還沒有作答紀錄。</p>'}
+    ${examPanel(k, sel)}
+  </section>`;
+}
+
+function examPanel(k, sel) {
+  if (!sel.size) return `<div class="exam"><strong>考試範圍準備度</strong><div class="sub" style="margin:4px 0 0">點上面的格子，選出期中考或期末考的範圍，這裡會算出整體準備度。</div></div>`;
+  const ls = k.lessons.filter(l => sel.has(l.subject + '|' + l.lesson));
+  let n = 0, ok = 0, rn = 0, rok = 0, b = { n: 0, ok: 0 }, e = { n: 0, ok: 0 };
+  ls.forEach(l => {
+    n += l.n; ok += l.ok; rn += l.rn; rok += l.rok;
+    Object.keys(l.levels || {}).forEach(v => { const t = v.indexOf('基本') >= 0 ? b : v.indexOf('延伸') >= 0 ? e : null; if (t) { t.n += l.levels[v].n; t.ok += l.levels[v].ok; } });
+  });
+  const weak = ls.filter(l => l.rn >= 3 && l.rok / l.rn < 0.6).map(l => l.subject + ' ' + l.lesson);
+  const pr = dbPct(rok, rn);
+  return `<div class="exam"><strong>考試範圍準備度</strong>　<span class="sub">已選 ${sel.size} 課</span>　<button type="button" class="linkish" id="clearExam">清除</button>
+    <div class="ex-row num">
+      <div><span class="sub">最近正確率</span><b class="${pr == null ? '' : pr >= 85 ? 'up' : pr < 60 ? 'down' : ''}">${pr == null ? '—' : pr + '%'}</b></div>
+      <div><span class="sub">範圍內作答</span><b>${n} 題</b></div>
+      <div><span class="sub">基本題</span><b>${b.n ? dbPct(b.ok, b.n) + '%' : '—'}</b></div>
+      <div><span class="sub">延伸題</span><b>${e.n ? dbPct(e.ok, e.n) + '%' : '—'}</b></div>
+    </div>
+    <div style="margin-top:8px;font-size:14px">${weak.length ? '考前先加強：<b class="down">' + esc(weak.join('、')) + '</b>' : '範圍內沒有明顯的弱點課次。'}</div></div>`;
+}
+
+function levelSheet(k) {
+  const subs = Object.keys(k.levels).sort(subjCmp);
+  const body = subs.map(s => {
+    const lv = k.levels[s];
+    const names = Object.keys(lv).sort((a, b) => (a.indexOf('基本') >= 0 ? 0 : a.indexOf('延伸') >= 0 ? 1 : 2) - (b.indexOf('基本') >= 0 ? 0 : b.indexOf('延伸') >= 0 ? 1 : 2) || a.localeCompare(b, 'zh-Hant'));
+    return `<div class="lv-subj"><h3>${esc(s)}</h3>${names.map(v => { const p = dbPct(lv[v].ok, lv[v].n); return `<div class="lv-row"><span>${esc(v)}</span><div class="track"><div class="fill ${tone(p)}" style="width:${p || 0}%"></div></div><span class="v num"><b>${p}%</b> /${lv[v].n}</span></div>`; }).join('')}</div>`;
+  }).join('');
+  return `<section class="sheet" aria-labelledby="h-lv"><h2 id="h-lv">基本題 vs 延伸題</h2>
+    <p class="sub">基本高、延伸低：記住了但還不會應用。兩個都低：觀念還沒建立，先回課本。</p>
+    ${body || '<p class="empty">還沒有資料。</p>'}</section>`;
+}
+
+function rushSheet(k) {
+  const r = k.rush;
+  if (r.measured < 10) return `<section class="sheet" aria-labelledby="h-rush"><h2 id="h-rush">作答節奏</h2><p class="empty">本週作答還不夠多，累積 10 題以上就會出現。</p></section>`;
+  const fp = dbPct(r.fast, r.measured), fa = dbPct(r.fastOk, r.fast), na = dbPct(r.normOk, r.normN);
+  const lvl = fp >= 25 ? 'down' : fp >= 12 ? '' : 'up';
+  const bar = (label, p, n) => `<div class="lv-row"><span>${label}</span><div class="track"><div class="fill ${tone(p)}" style="width:${p || 0}%"></div></div><span class="v num"><b>${p == null ? '—' : p + '%'}</b> /${n}</span></div>`;
+  return `<section class="sheet" aria-labelledby="h-rush"><h2 id="h-rush">作答節奏</h2>
+    <p class="sub">3 秒內就答完的題目，常常是沒看題目就點。</p>
+    <div class="rush-big num ${lvl}">${fp}%</div><div class="sub" style="margin:0">本週 ${r.measured} 題裡，有 ${r.fast} 題在 3 秒內答完</div>
+    <div class="rush-cmp">${bar('太快', fa, r.fast)}${bar('正常', na, r.normN)}</div>
+    <p class="small">作答秒數是用前後兩題的時間差推算的，每一輪的第一題不計。</p></section>`;
+}
+
+function wrongSheet(k) {
+  const list = k.wrongs.filter(w => !onlyOpen || !w.lastOk);
+  const items = list.map(w => `<li class="wrong ${w.lastOk ? 'fixed' : ''}">
+    <div class="wrong-top"><span class="pill ${w.lastOk ? 'fixed' : 'open'}">${w.lastOk ? '已訂正' : '還會錯'}</span><span>${esc(w.subject)}・${esc(w.lesson)}</span><span class="num">錯 ${w.wrong} 次 / 共做 ${w.n} 次</span></div>
+    <div class="q">${esc(w.q)}</div>
+    <div class="ans"><span class="picked">他常選：<s>${esc(w.chosen)}</s></span><span class="right">正確：${esc(w.answer)}</span></div></li>`).join('');
+  const openN = k.wrongs.filter(w => !w.lastOk).length;
+  return `<section class="sheet" aria-labelledby="h-wrong"><h2 id="h-wrong">錯題本 <span class="hint">同一題錯 2 次以上</span></h2>
+    <div class="heat-tools"><div class="seg" role="group" aria-label="要看哪些錯題">
+      <button type="button" data-open="0" aria-pressed="${!onlyOpen}">全部 ${k.wrongs.length}</button>
+      <button type="button" data-open="1" aria-pressed="${onlyOpen}">還會錯 ${openN}</button></div></div>
+    ${items ? `<ul class="wrong-list">${items}</ul>` : '<p class="empty">目前沒有反覆答錯的題目。</p>'}</section>`;
+}
+
+function habitSheet(k) {
+  const h = k.habit;
+  if (!h) return '';
+  return `<section class="sheet" aria-labelledby="h-habit"><h2 id="h-habit">生活習慣</h2>
+    <div class="habit num">
+      <div><b>${h.stickers}</b><span>手上的貼紙（累積 ${h.earned}）</span></div>
+      <div><b class="${h.pendingReq ? 'down' : ''}">${h.pendingReq}</b><span>貼紙申請等確認</span></div>
+      <div><b class="${h.pendingRedeem ? 'down' : ''}">${h.pendingRedeem}</b><span>兌換獎勵等確認</span></div>
+    </div></section>`;
+}
+
+/* ===== 互動 ===== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button');
+  if (!t || !data) return;
+  if (t.dataset.i != null) { kidIdx = +t.dataset.i; store.set('kid', kidIdx); onlyOpen = false; render(); }
+  else if (t.dataset.basis) { basis = t.dataset.basis; store.set('basis', basis); render(); }
+  else if (t.dataset.open != null) { onlyOpen = t.dataset.open === '1'; render(); }
+  else if (t.dataset.cell) {
+    const k = data.kids[kidIdx], s = new Set(store.get(examKey(k), []));
+    s.has(t.dataset.cell) ? s.delete(t.dataset.cell) : s.add(t.dataset.cell);
+    store.set(examKey(k), [...s]); render();
+  } else if (t.id === 'clearExam') { store.set(examKey(data.kids[kidIdx]), []); render(); }
+});
+function openSettings() {
+  const c = cfg();
+  $('cfgUrl').value = c.url; $('cfgKey').value = c.key; $('cfgPin').value = c.pin; $('setErr').textContent = '';
+  $('setBox').hidden = false; $('cfgUrl').focus();
+}
+$('openSet').onclick = openSettings;
+$('reload').onclick = load;
+$('useDemo').onclick = () => { $('setBox').hidden = true; useDemo('目前顯示示範資料。'); };
+$('setBox').addEventListener('click', e => { if (e.target === $('setBox')) $('setBox').hidden = true; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('setBox').hidden = true; });
+$('setForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const url = $('cfgUrl').value.trim(), key = $('cfgKey').value.trim(), pin = $('cfgPin').value.trim();
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { $('setErr').textContent = '網址要是 https://script.google.com/ 開頭、/exec 結尾。'; return; }
+  if (!key) { $('setErr').textContent = '請填家庭密碼。'; return; }
+  if (!/^\d{4}$/.test(pin)) { $('setErr').textContent = '家長密碼是 4 位數字。'; return; }
+  store.set('cfg', { url, key, pin });
+  $('setBox').hidden = true;
+  load();
+});
+load();
+</script>
+
+</body>
+</html>
