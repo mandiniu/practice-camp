@@ -945,7 +945,10 @@ function startQuiz(subj, onlyQs, lesson, mode){
     return [...shuffle(pickB),...shuffle(pickA)];
   })();
   if(!qs0.length){ toast('這裡還沒有題目'); return; }
-  quiz={subj, mode, qs:qs0.map(q=>({...q, subj:q.subj||subj, order:q.t==='multi'||q.keep?q.o.map((_,j)=>j):shuffle(q.o.map((_,j)=>j)), mp:q.parts?q.parts.map(()=>null):null})), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
+  const prep=q=>{ const c={...q, subj:q.subj||subj, order:q.t==='multi'?[]:(q.keep?q.o.map((_,j)=>j):shuffle(q.o.map((_,j)=>j)))};
+    if(q.parts){ c.parts=q.parts.map(pt=>{ if(!pt.o||pt.keep) return pt; const ord=shuffle(pt.o.map((_,j)=>j)); return {...pt, o:ord.map(j=>pt.o[j]), a:ord.indexOf(pt.a)}; }); c.mp=c.parts.map(()=>null); }
+    return c; };
+  quiz={subj, mode, qs:qs0.map(prep), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
   clearInterval(tick); tick=setInterval(()=>{ if(document.visibilityState==='visible'){ S.seconds++; if(S.seconds%30===0){ save(); checkMedals(); } } },1000);
   tab='learn'; render();
 }
@@ -969,7 +972,7 @@ function renderQuiz(p){
   let body='';
   if(multi){
     body=`${q.legend?`<div class="legend">${q.o.map(x=>`<span>${x}</span>`).join('')}</div>`:''}<div class="mparts">${q.parts.map((pt,j)=>{ const mine=q.mp[j]; let cls=''; if(done) cls=mine===pt.a?'right':'wrong';
-      return `<div class="mpart ${cls}"><div class="ms"><b>${PLAB[j]}</b> ${pt.s}</div><div class="mchips ${q.tf?'tf':''}">${q.o.map((lab,i)=>{ let c=''; if(mine===i) c='sel'; if(done&&i===pt.a) c+=' ans'; return `<button class="mchip ${c}" data-j="${j}" data-i="${i}" ${done?'disabled':''}>${q.legend?lab.split(' ')[0]:lab}</button>`;}).join('')}</div>${done&&pt.why&&mine!==pt.a?`<div class="pwhy">${pt.why}</div>`:''}</div>`; }).join('')}</div>`;
+      return `<div class="mpart ${cls}"><div class="ms"><b>${PLAB[j]}</b> ${pt.s}</div><div class="mchips ${q.tf?'tf':''}">${(pt.o||q.o).map((lab,i)=>{ let c=''; if(mine===i) c='sel'; if(done&&i===pt.a) c+=' ans'; return `<button class="mchip ${c}" data-j="${j}" data-i="${i}" ${done?'disabled':''}>${q.legend?lab.split(' ')[0]:lab}</button>`;}).join('')}</div>${done&&pt.why&&mine!==pt.a?`<div class="pwhy">${pt.why}</div>`:''}</div>`; }).join('')}</div>`;
   } else {
     body=`<div class="opts ${q.pic?'pics':''}">${q.order.map(i=>{ let cls=''; if(done){ if(i===q.a) cls='right'; else if(i===quiz.picked) cls='wrong'; } return `<button class="opt ${cls}" data-i="${i}" ${done?'disabled':''}>${q.o[i]}</button>`;}).join('')}</div>`;
   }
@@ -990,8 +993,8 @@ function renderQuiz(p){
 function answer(i){ const q=quiz.qs[quiz.i]; quiz.picked=i; const t=j=>q.pic?'第 '+(q.order.indexOf(j)+1)+' 張圖':plain(q.o[j]); commit(i===q.a, t(i), t(q.a)); }
 function submitMulti(){
   const q=quiz.qs[quiz.i]; quiz.picked=-1;
-  const lab=i=>plain(q.o[i]).split(' ')[0];
-  commit(q.parts.every((pt,j)=>q.mp[j]===pt.a), q.mp.map((x,j)=>PLAB[j]+lab(x)).join(' '), q.parts.map((pt,j)=>PLAB[j]+lab(pt.a)).join(' '));
+  const lab=(j,i)=>plain((q.parts[j].o||q.o)[i]).split(' ')[0];
+  commit(q.parts.every((pt,j)=>q.mp[j]===pt.a), q.mp.map((x,j)=>PLAB[j]+lab(j,x)).join(' '), q.parts.map((pt,j)=>PLAB[j]+lab(j,pt.a)).join(' '));
 }
 function commit(ok, chosenText, rightText){
   const q=quiz.qs[quiz.i], id=qid(q.subj,q), lv=q.lv||1;
@@ -1025,7 +1028,7 @@ function renderResult(p){
 function renderReview(p){
   const groups=subjectsOf(S).map(k=>({k, qs:bankOf(S,k).filter(q=>S.missed.includes(qid(k,q)))})).filter(g=>g.qs.length);
   p.innerHTML=`<h2>錯題本</h2><p class="sub">答錯的題目會收在這裡，重新答對就會拿掉，還能拿回經驗值。</p>
-  ${groups.length?groups.map(g=>{const s=SUBJECTS[g.k];return `<div class="revgroup" style="--c:${s.c}"><div class="qhead"><h3>${s.name}・${g.qs.length} 題</h3><button class="btn hot" data-rev="${g.k}">練這 ${Math.min(5,g.qs.length)} 題</button></div><ul>${g.qs.map(q=>`<li><span class="pill">${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span> ${plain(q.q)}${q.parts?'（'+q.parts.length+' 小題）':''}</li>`).join('')}</ul></div>`;}).join('')
+  ${groups.length?groups.map(g=>{const s=SUBJECTS[g.k];return `<div class="revgroup" style="--c:${s.c}"><div class="qhead"><h3>${s.name}・${g.qs.length} 題</h3><button class="btn hot" data-rev="${g.k}">練這 ${Math.min(5,g.qs.length)} 題</button></div><ul>${g.qs.map(q=>`<li><span class="pill">${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span> ${q.ctx?esc(plain(q.ctx).slice(0,40))+'…　':''}${plain(q.q)}${q.parts?'（'+q.parts.length+' 小題）':''}</li>`).join('')}</ul></div>`;}).join('')
   :`<div class="empty">${av(charSVG(S))}<p>錯題本是空的，答錯的題目會出現在這裡。</p></div>`}`;
   p.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ const g=groups.find(x=>x.k===b.dataset.rev); startQuiz(g.k, shuffle(g.qs).slice(0,5)); });
 }
