@@ -728,11 +728,35 @@ async function api(body){
   const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify(Object.assign({key:CFG.key},body))});
   const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤'); return j;
 }
+async function saveKidGuarded(k){
+  const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify({key:CFG.key,action:'habitSaveKid',kid:k})});
+  const j=await r.json();
+  if(j.conflict) return j;
+  if(!j.ok){
+    if(/不認得的動作/.test(j.error||'')){ await api({action:'saveKid',kid:k}); return {ok:true}; }  // Apps Script 還沒更新時的舊做法
+    throw new Error(j.error||'雲端回應錯誤');
+  }
+  return j;
+}
 async function pushNow(){
   if(!cloudOn()) return;
   try{
-    for(const id of [...dirty]){ const k=DB.kids.find(x=>x.id===id); if(k){ const stamp=k.updated; k.synced=stamp; await api({action:'saveKid',kid:k}); } dirty.delete(id); }
+    let replaced=false;
+    for(const id of [...dirty]){
+      const k=DB.kids.find(x=>x.id===id); if(!k){ dirty.delete(id); continue; }
+      const stamp=k.updated, j=await saveKidGuarded(k);
+      if(j.conflict){
+        // 雲端上有比這台平板更新的進度：改用雲端版本，只把這台改過的名字／年級補上去
+        const sk=fixKid(j.kid);
+        if(k.profileEdit){ Object.assign(sk,k.profileEdit); sk.profileEdit=k.profileEdit; sk.updated=Date.now(); } else dirty.delete(id);
+        const i=DB.kids.indexOf(k); DB.kids[i]=sk; if(S&&S.id===sk.id) S=sk; replaced=true; continue;
+      }
+      if(j.rev) k.rev=j.rev;
+      k.synced=stamp;
+      if(k.updated===stamp){ delete k.profileEdit; dirty.delete(id); }
+    }
     saveLocal();
+    if(replaced){ if(!quiz) render(); toast('這台平板的資料比較舊，已換成雲端上最新的進度'); if(dirty.size) schedulePush(); }
     if(logQueue.length){ const rows=logQueue.splice(0); try{ await api({action:'log',rows}); }catch(e){ logQueue.unshift(...rows); throw e; } }
     setCloud('ok','已同步到雲端');
   }catch(e){ setCloud('error','同步失敗：'+e.message+'（資料先存在平板上，連線後會再試）'); }
@@ -744,7 +768,8 @@ async function pullCloud(){
     const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤');
     // 以雲端為主；平板上還沒上傳的新資料保留下來並補傳
     const server=(j.kids||[]).map(fixKid), merged=[];
-    server.forEach(sk=>{ const lk=DB.kids.find(x=>x.id===sk.id); if(lk && (lk.updated||0)>(sk.updated||0)){ merged.push(lk); dirty.add(lk.id); } else merged.push(sk); });
+    // 只有「這台平板上還沒上傳的修改」才保留本機版本；其他一律以雲端為準
+    server.forEach(sk=>{ const lk=DB.kids.find(x=>x.id===sk.id); if(lk && (lk.updated||0)>(lk.synced||0)){ merged.push(lk); dirty.add(lk.id); } else merged.push(sk); });
     DB.kids.forEach(lk=>{ if(!server.some(x=>x.id===lk.id) && (lk.updated||0)>(lk.synced||0)){ merged.push(lk); dirty.add(lk.id); } });
     DB.kids=merged;
     S=DB.kids.find(k=>k.id===DB.current)||null; if(!S){ DB.current=null; }
@@ -877,7 +902,7 @@ function renderProfile(p){
   p.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{ g=+b.dataset.grade; p.querySelectorAll('[data-grade]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
   p.querySelectorAll('[data-sem]').forEach(b=>b.onclick=()=>{ s=b.dataset.sem; p.querySelectorAll('[data-sem]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
   $('#cancel').onclick=()=>{ tab='learn'; render(); };
-  $('#saveP').onclick=()=>{ S.name=$('#pName').value.trim()||S.name; S.grade=g; S.sem=s; save(); tab='learn'; render(); toast('已改成'+termLabel(S)); };
+  $('#saveP').onclick=()=>{ S.name=$('#pName').value.trim()||S.name; S.grade=g; S.sem=s; S.profileEdit={name:S.name,grade:g,sem:s}; save(); tab='learn'; render(); toast('已改成'+termLabel(S)); };
 }
 
 /* ---- 造型室 ---- */
@@ -1172,7 +1197,12 @@ function boot(){
   if(cloudOn()){ pullCloud().then(()=>{ if(!S) tab='who'; render(); }); }
 }
 window.addEventListener('pagehide',()=>{ if(cloudOn()) pushNow(); });
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && cloudOn()) pushNow(); });
+document.addEventListener('visibilitychange',()=>{
+  if(!cloudOn()) return;
+  if(document.visibilityState==='hidden') pushNow();
+  // 每次回到練習營都先抓雲端最新進度，避免用舊資料繼續玩
+  else if(!quiz) pullCloud().then(()=>{ if(quiz) return; if(!S) tab='who'; render(); });
+});
 
 // 每次打開都抓最新的題庫檔，避免平板用到舊題目
 (function(){ var s=document.createElement('script'); s.src='questions.js?t='+Date.now(); s.onload=s.onerror=boot; document.head.appendChild(s); })();
