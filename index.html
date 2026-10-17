@@ -662,17 +662,20 @@ try{
 }catch(e){}
 DB.kids=DB.kids.map(fixKid);
 let S=DB.kids.find(k=>k.id===DB.current)||null;
-let CFG={url:'',key:''}; try{ CFG=Object.assign(CFG,JSON.parse(localStorage.getItem(CFG_KEY)||'{}')); }catch(e){}
-let cloud={state:CFG.url?'connecting':'off', msg:''}, pushTimer=null, logQueue=[], dirty=new Set();
+// 家裡的 Apps Script 網址（已內建，平板上只要輸入家庭密碼）
+const DEFAULT_URL='https://script.google.com/macros/s/AKfycby08Qans1TJG6zTa5p-2edeO0aiy_QYQ4oJgckxf430MwZ3aobZWQcZ14nFk061Ah3z/exec';
+let CFG={url:DEFAULT_URL,key:''}; try{ CFG=Object.assign(CFG,JSON.parse(localStorage.getItem(CFG_KEY)||'{}')); if(!CFG.url) CFG.url=DEFAULT_URL; }catch(e){}
+const cloudOn=()=>!!(CFG.url&&CFG.key);
+let cloud={state:cloudOn()?'connecting':'off', msg:''}, pushTimer=null, logQueue=[], dirty=new Set();
 function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
 function save(){ if(S){ S.updated=Date.now(); dirty.add(S.id); } saveLocal(); schedulePush(); }
-function schedulePush(){ if(!CFG.url) return; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,1500); }
+function schedulePush(){ if(!cloudOn()) return; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,1500); }
 async function api(body){
   const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify(Object.assign({key:CFG.key},body))});
   const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤'); return j;
 }
 async function pushNow(){
-  if(!CFG.url) return;
+  if(!cloudOn()) return;
   try{
     for(const id of [...dirty]){ const k=DB.kids.find(x=>x.id===id); if(k){ const stamp=k.updated; k.synced=stamp; await api({action:'saveKid',kid:k}); } dirty.delete(id); }
     saveLocal();
@@ -681,7 +684,7 @@ async function pushNow(){
   }catch(e){ setCloud('error','同步失敗：'+e.message+'（資料先存在平板上，連線後會再試）'); }
 }
 async function pullCloud(){
-  if(!CFG.url){ setCloud('off',''); return false; }
+  if(!cloudOn()){ setCloud('off',''); return false; }
   try{
     const r=await fetch(CFG.url+(CFG.url.includes('?')?'&':'?')+'action=load&key='+encodeURIComponent(CFG.key));
     const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤');
@@ -696,7 +699,7 @@ async function pullCloud(){
 }
 function setCloud(state,msg){ cloud={state,msg}; const el=$('#cloudDot'); if(el){ el.dataset.state=state; el.title=msg; el.textContent=state==='ok'?'雲端已同步':state==='error'?'離線中':state==='connecting'?'連線中':'只存在這台平板'; } }
 function logAnswer(q,chosen,ok){
-  if(!CFG.url) return;
+  if(!cloudOn()) return;
   logQueue.push({time:new Date().toISOString(), kid:S.name, kidId:S.id, term:termLabel(S), subject:SUBJECTS[quiz.subj].name, lesson:q.l||'', unit:q.u, level:LV_NAME[q.lv||1], question:q.q, chosen:q.o[chosen], answer:q.o[q.a], ok});
 }
 
@@ -787,7 +790,7 @@ function renderWho(p){
   setCloud(cloud.state,cloud.msg);
 }
 function renderParent(p){
-  const locked = CFG.key && !renderParent.ok;
+  const locked = cloudOn() && !renderParent.ok;
   if(locked){
     p.innerHTML=`<h2>家長設定</h2><p class="sub">請輸入家庭密碼。</p><form id="pw" class="addkid"><input id="pwIn" type="password" placeholder="家庭密碼" aria-label="家庭密碼"><button class="btn hot">確認</button></form><div class="actions"><button class="btn ghost" id="back">返回</button></div>`;
     $('#pw').onsubmit=e=>{ e.preventDefault(); if($('#pwIn').value===CFG.key){ renderParent.ok=true; render(); } else toast('密碼不對'); };
@@ -796,18 +799,18 @@ function renderParent(p){
   p.innerHTML=`<h2>家長設定</h2>
   <p class="sub">設定後，成績會存到你的 Google 試算表，換平板或清除瀏覽器資料都不會不見。每台平板設定一次即可。</p>
   <form id="cfg">
-    <div class="optrow"><h4>Apps Script 網址</h4><input class="field" id="cfgUrl" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/……/exec"></div>
-    <div class="optrow"><h4>家庭密碼（和 Apps Script 裡設定的一樣）</h4><input class="field" id="cfgKey" type="password" value="${esc(CFG.key)}"></div>
+    <div class="optrow"><h4>家庭密碼（和 Apps Script 裡設定的一樣）</h4><input class="field" id="cfgKey" type="password" value="${esc(CFG.key)}" placeholder="輸入家庭密碼"></div>
+    <details class="optrow"${CFG.url===DEFAULT_URL?'':' open'}><summary class="note">進階：Apps Script 網址（已內建，通常不用改）</summary><input class="field" id="cfgUrl" value="${esc(CFG.url)}"></details>
     <div class="actions" style="justify-content:flex-start"><button class="btn hot">儲存並連線</button><button type="button" class="btn ghost" id="cfgOff">改回只存在這台平板</button></div>
   </form>
   <p class="sub" id="cfgMsg">${esc(cloud.msg||'')}</p>
   <div class="actions"><button class="btn ghost" id="back">返回</button></div>`;
-  $('#cfg').onsubmit=async e=>{ e.preventDefault(); CFG={url:$('#cfgUrl').value.trim(), key:$('#cfgKey').value}; try{ localStorage.setItem(CFG_KEY,JSON.stringify(CFG)); }catch(_){}
+  $('#cfg').onsubmit=async e=>{ e.preventDefault(); CFG={url:$('#cfgUrl').value.trim()||DEFAULT_URL, key:$('#cfgKey').value}; if(!CFG.key){ toast('請輸入家庭密碼'); return; } try{ localStorage.setItem(CFG_KEY,JSON.stringify(CFG)); }catch(_){}
     setCloud('connecting',''); $('#cfgMsg').textContent='連線中……';
     DB.kids.forEach(k=>{ if(!k.synced) k.updated=Math.max(k.updated||0,1); });
     const ok=await pullCloud(); if(ok) await pushNow();
     renderParent.ok=true; render(); };
-  $('#cfgOff').onclick=()=>{ CFG={url:'',key:''}; try{ localStorage.removeItem(CFG_KEY); }catch(_){} setCloud('off',''); render(); };
+  $('#cfgOff').onclick=()=>{ CFG={url:DEFAULT_URL,key:''}; try{ localStorage.removeItem(CFG_KEY); }catch(_){} setCloud('off',''); render(); };
   $('#back').onclick=()=>{ parentOpen=false; render(); };
 }
 function renderProfile(p){
@@ -990,10 +993,10 @@ function renderMedals(p){
 /* ================= 開始 ================= */
 function boot(){
   render();
-  if(CFG.url){ pullCloud().then(()=>{ if(!S) tab='who'; render(); }); }
+  if(cloudOn()){ pullCloud().then(()=>{ if(!S) tab='who'; render(); }); }
 }
-window.addEventListener('pagehide',()=>{ if(CFG.url) pushNow(); });
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && CFG.url) pushNow(); });
+window.addEventListener('pagehide',()=>{ if(cloudOn()) pushNow(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && cloudOn()) pushNow(); });
 
 // 每次打開都抓最新的題庫檔，避免平板用到舊題目
 (function(){ var s=document.createElement('script'); s.src='questions.js?t='+Date.now(); s.onload=s.onerror=boot; document.head.appendChild(s); })();
