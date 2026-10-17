@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>生活習慣貼紙本</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,7 +28,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--grape);outline-offset:2px}
-.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.wrap{width:100%;max-width:1120px;margin:0 auto;min-width:0;display:flex;flex-direction:column;gap:18px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.25}
 h2{font-size:1.3rem}
 .sub{color:var(--muted);font-size:.92rem;margin:0}
@@ -105,7 +110,7 @@ h2{font-size:1.3rem}
 .tag{display:inline-block;font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--sun-soft);color:#8A6300}
 
 /* week table */
-.tablewrap{overflow-x:auto}
+.tablewrap{overflow-x:auto;max-width:100%}
 table.week{border-collapse:separate;border-spacing:4px;width:100%;min-width:520px;font-variant-numeric:tabular-nums}
 .week th{font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;padding:2px}
 .week th.hn{text-align:left;font-size:.92rem;color:var(--ink);white-space:nowrap;max-width:9em;overflow:hidden;text-overflow:ellipsis}
@@ -165,9 +170,49 @@ label.lbl{font-weight:700;font-size:.92rem}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:10px 20px;font-weight:700;z-index:40;max-width:calc(100% - 32px);text-align:center}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:35}
+/* phone */
+@media (max-width:560px){
+  body{font-size:15px}
+  .top{padding-top:12px;gap:10px}
+  .brand h1{font-size:1.2rem}
+  .brand svg{width:36px;height:36px}
+  .kids{order:3;width:100%}
+  .kidtab{flex:1;justify-content:center;padding:6px 10px 6px 6px}
+  .pbtn{padding:6px 12px;font-size:.9rem}
+  .hero{padding:14px 16px}
+  .hero .big{font-size:2rem}
+  .hero .next{min-width:0;flex-basis:100%;margin-left:0}
+  .panel{padding:16px;border-radius:18px}
+  .hrow{gap:10px;padding:8px 10px}
+  .slot{width:46px;height:46px}
+  .slot svg{width:50px;height:50px}
+  .hname{font-size:1rem}
+  .btn{padding:9px 14px;font-size:.92rem}
+  .book-grid{gap:6px}
+  .rrow{grid-template-columns:auto minmax(0,1fr);}
+  .rrow .btn{grid-column:1/-1;justify-self:stretch}
+  .rrow .bar{grid-column:1/-1}
+  .ptabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .ptab{padding:8px 4px;font-size:.9rem;text-align:center}
+  .ptab .badge{margin-left:3px;padding:0 6px}
+  table.week{min-width:0;border-spacing:2px}
+  .week th{font-size:.7rem}
+  .week th.hn{font-size:.8rem;max-width:4.6em;white-space:normal;line-height:1.2;overflow:visible}
+  .week td svg{width:24px;height:24px}
+  .ptab{white-space:nowrap}
+  .ptab .badge{font-size:.72rem}
+  .week td{height:30px}
+  .pbar .sub:last-child{display:none}
+  .req .acts{width:100%;justify-content:stretch}
+  .req .acts .btn{flex:1}
+  .erow.r{grid-template-columns:minmax(0,1fr) 64px auto}
+  .seg button{padding:5px 11px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <header class="top">
     <div class="brand"><svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true"><use href="#stk0"/></svg><div><h1>生活習慣貼紙本</h1><small>小學生練習營</small></div></div>
@@ -415,8 +460,10 @@ let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;
 
 /* ================= 資料來源：雲端（Apps Script）或示範 ================= */
 const CFG_KEY='practice-camp-cloud';            // 和練習營共用同一組雲端設定
-let CFG=store(CFG_KEY)||{url:'',key:''};
-let DEMO=null, demo=!CFG.url;
+const DEFAULT_URL='https://script.google.com/macros/s/AKfycby08Qans1TJG6zTa5p-2edeO0aiy_QYQ4oJgckxf430MwZ3aobZWQcZ14nFk061Ah3z/exec';
+const ON_SITE=/github\.io$/.test(location.hostname);   // 在你的網站上：用真資料；在 Claude 預覽：示範資料
+let CFG=Object.assign({url:'',key:''},store(CFG_KEY)||{}); if(!CFG.url) CFG.url=DEFAULT_URL;
+let DEMO=null, demo=!ON_SITE && !CFG.key;
 let ST=null, kidId=store('habits-kid'), busy=false, loadErr='';
 let mode='kid', ptab='inbox', parent=null, pKid=null, pDate=null, idleT=null;
 let by=store('habits-by')||'媽媽';
@@ -446,6 +493,7 @@ async function load(){
     const r=await fetch(CFG.url+(CFG.url.includes('?')?'&':'?')+'action=habitLoad&key='+encodeURIComponent(CFG.key));
     const j=await r.json();
     if(!j.ok) throw new Error(j.error||'讀取失敗');
+    if(!j.state) throw new Error('Apps Script 還沒更新：請確認已加上 Habits.gs、Code.gs 的兩行，並部署「新版本」');
     ST=j.state; loadErr='';
   }catch(e){ loadErr=e.message==='Failed to fetch'?'連不到雲端，請檢查網路':e.message; }
 }
@@ -492,11 +540,23 @@ function pendingAll(){
 /* ================= 畫面 ================= */
 function render(){
   renderBanner();
+  if(!demo && !CFG.key){ renderSetup(); return; }
   if(!ST){ $('#app').innerHTML=`<div class="panel"><p class="sub">${loadErr?esc(loadErr):'讀取中…'}</p>${loadErr?'<button class="btn grape" id="retry">再試一次</button>':''}</div>`; $('#retry')&&($('#retry').onclick=boot); $('#kids').innerHTML=''; return; }
   if(!ST.kids.length){ $('#kids').innerHTML=''; $('#app').innerHTML=`<div class="panel"><h2>還沒有小朋友</h2><p class="sub">請先打開練習營，讓小朋友建立自己的檔案（會存到同一份試算表），再回來這裡。</p></div>`; renderTop(); return; }
   if(!kidOf(kidId)) kidId=ST.kids[0].id;
   renderTop();
   if(mode==='parent') renderParent(); else renderKid();
+}
+function renderSetup(){
+  $('#kids').innerHTML=''; $('#back').hidden=false; $('#pbtn').hidden=true; $('#banner').innerHTML='';
+  $('#app').innerHTML=`<section class="panel" style="max-width:520px"><h2>這台裝置還沒連上雲端</h2>
+    <p class="sub">輸入練習營的家庭密碼（Apps Script 裡設定的那組），每台裝置只要輸入一次。</p>
+    <form id="setup" class="stack"><input class="field" id="skey" type="password" autocomplete="off" placeholder="家庭密碼" aria-label="家庭密碼">
+    <div><button class="btn hot">連線</button></div><p class="sub" id="smsg">${esc(loadErr||'')}</p></form></section>`;
+  $('#setup').onsubmit=async e=>{ e.preventDefault(); const k=$('#skey').value.trim(); if(!k){ toast('請輸入家庭密碼'); return; }
+    $('#smsg').textContent='連線中…'; CFG.key=k; ST=null; await load();
+    if(loadErr){ CFG.key=''; render(); $('#smsg').textContent=loadErr; return; }
+    store(CFG_KEY,CFG); $('#pbtn').hidden=false; render(); toast('連上了！'); };
 }
 function renderBanner(){
   $('#back').hidden=demo;
@@ -598,13 +658,14 @@ function renderParent(){
   <div class="pbar"><strong>家長模式</strong><span class="sub">我是</span>
     <span class="seg" role="group" aria-label="我是誰">${['媽媽','爸爸'].map(w=>`<button data-by="${w}" aria-pressed="${by===w}">${w}</button>`).join('')}</span>
     <span class="sub" style="margin-left:auto">10 分鐘沒動作會自動離開</span></div>
-  ${ST.settings.pinIsDefault?'<div class="banner">家長密碼還是 0000，小朋友很容易猜到。請到「設定」改掉。</div>':''}
+  ${ST.settings.pinIsDefault&&ptab!=='settings'?'<div class="banner">家長密碼還是 0000，小朋友很容易猜到。<button class="btn grape sm" id="gopin">現在去改</button></div>':''}
   <nav class="ptabs" aria-label="家長功能">
     ${[['inbox','待確認',pend.length],['give','發貼紙'],['gift','驚喜貼紙'],['settings','設定']].map(([id,l,n])=>`<button class="ptab" data-pt="${id}" aria-pressed="${ptab===id}">${l}${n?`<span class="badge">${n}</span>`:''}</button>`).join('')}
   </nav>
   <section class="panel" id="pbody"></section>`;
   document.querySelectorAll('[data-by]').forEach(b=>b.onclick=()=>{ by=b.dataset.by; store('habits-by',by); render(); });
   document.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{ ptab=b.dataset.pt; render(); });
+  const gp=$('#gopin'); if(gp) gp.onclick=()=>{ ptab='settings'; render(); setTimeout(()=>{ const n=$('#newpin'); if(n){ n.scrollIntoView({block:'center'}); n.focus(); } },50); };
   ({inbox:pInbox,give:pGive,gift:pGift,settings:pSettings})[ptab]($('#pbody'),pend);
 }
 function kidPicker(cur){ return `<span class="seg" role="group" aria-label="選小朋友">${ST.kids.map(k=>`<button data-pk="${k.id}" aria-pressed="${k.id===cur}">${esc(k.name)}</button>`).join('')}</span>`; }
@@ -679,7 +740,7 @@ function pSettings(el){
   <div class="stack"><h3>家長密碼</h3><div class="erow"><input class="field" id="newpin" inputmode="numeric" maxlength="4" placeholder="新的 4 位數字"><button class="btn grape sm" id="pinsave">更換</button></div></div>
   <hr style="border:none;border-top:2px dashed var(--line);width:100%">
   <div class="stack"><h3>雲端連線</h3><p class="sub">和練習營用同一組設定。平板上練習營已經設定好的話，這裡不用再填。</p>
-    <input class="field" id="curl" placeholder="https://script.google.com/macros/s/……/exec" value="${esc(CFG.url)}" aria-label="Apps Script 網址">
+    <input class="field" id="curl" placeholder="已內建，通常不用填" value="${esc(CFG.url===DEFAULT_URL?'':CFG.url)}" aria-label="Apps Script 網址（已內建，通常留空）">
     <input class="field" id="ckey" type="password" placeholder="家庭密碼" value="${esc(CFG.key)}" aria-label="家庭密碼">
     <div class="acts" style="justify-content:flex-start"><button class="btn grape sm" id="csave">儲存並連線</button></div></div>`;
   wirePicker(el,render);
@@ -694,7 +755,7 @@ function pSettings(el){
   el.querySelector('#radd').onclick=()=>{ draftRewards.push({name:'',cost:20}); render(); };
   el.querySelector('#rsave').onclick=async()=>{ if(await act({type:'setRewards',rewards:draftRewards},'獎勵清單已儲存')){ draftRewards=null; render(); } };
   el.querySelector('#pinsave').onclick=async()=>{ const v=el.querySelector('#newpin').value.trim(); if(!/^\d{4}$/.test(v)){ toast('密碼要是 4 位數字'); return; } if(await act({type:'setPin',newPin:v},'家長密碼已更換')){ parent.pin=v; } };
-  el.querySelector('#csave').onclick=async()=>{ CFG={url:el.querySelector('#curl').value.trim(),key:el.querySelector('#ckey').value}; store(CFG_KEY,CFG); demo=!CFG.url; parent=null; mode='kid'; ST=null; render(); await load(); render(); toast(loadErr?loadErr:'已連線，請重新輸入家長密碼'); };
+  el.querySelector('#csave').onclick=async()=>{ CFG={url:el.querySelector('#curl').value.trim()||DEFAULT_URL,key:el.querySelector('#ckey').value}; store(CFG_KEY,CFG); demo=false; parent=null; mode='kid'; ST=null; render(); await load(); render(); toast(loadErr?loadErr:'已連線，請重新輸入家長密碼'); };
 }
 
 /* ---------- 彩帶 ---------- */
@@ -719,3 +780,6 @@ setInterval(async()=>{
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&!demo&&!busy){ load().then(render); } });
 boot();
 </script>
+
+</body>
+</html>
