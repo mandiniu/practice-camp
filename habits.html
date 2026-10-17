@@ -1,0 +1,718 @@
+<title>生活習慣貼紙本</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F7F0FF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: sticker-book board — today's habits on the left, the sticker card and rewards on the right; stacks on portrait tablets and phones.
+   One committed bright look (same lilac paper as 練習營), not theme-switched. */
+:root{
+  --paper:#F7F0FF; --card:#FFFFFF; --ink:#2B2350; --muted:#6C6590; --line:#E6DCF8; --soft:#F1EAFE;
+  --pink:#FF4F96; --pink-soft:#FFE1EE; --sun:#FFC22E; --sun-soft:#FFF3C9; --mint:#14A982; --mint-soft:#D7F6EC;
+  --sky:#3B82F6; --grape:#7454E8; --grape-soft:#ECE5FF; --gold:#E2A400;
+  --display:"Chiron GoRound TC","Huninn","PingFang TC","Microsoft JhengHei",sans-serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --r:22px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px;
+  background-image:radial-gradient(circle at 1px 1px,#E9DEFB 1.2px,transparent 1.3px);background-size:22px 22px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.25}
+h2{font-size:1.3rem}
+.sub{color:var(--muted);font-size:.92rem;margin:0}
+
+/* top bar */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding-top:18px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand h1{font-size:1.45rem;font-weight:800;letter-spacing:.02em}
+.brand small{display:block;font-family:var(--body);font-size:.8rem;color:var(--muted);font-weight:500}
+.kids{display:flex;gap:8px;flex-wrap:wrap}
+.kidtab{display:flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px 6px 6px;font-weight:700}
+.kidtab[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+.kidtab .cnt{font-family:var(--display);background:var(--sun);color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.9rem}
+.kidtab .face{width:30px;height:30px}
+.pbtn{border:2px dashed var(--grape);background:transparent;color:var(--grape);border-radius:999px;padding:8px 16px;font-weight:700}
+.pbtn.on{border-style:solid;background:var(--grape);color:#fff}
+.banner{border-radius:16px;padding:10px 14px;font-size:.92rem;background:var(--sun-soft);border:2px solid #F5DD8A}
+.banner.err{background:var(--pink-soft);border-color:#FFB3D0}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:0 2px 0 var(--line),0 10px 30px -18px rgba(60,30,140,.35);display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* hero */
+.hero{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;background:var(--ink);color:#fff;border-radius:var(--r);padding:18px 22px}
+.hero .date{font-family:var(--display);font-size:1.1rem;opacity:.85}
+.hero .big{font-family:var(--display);font-size:2.4rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.hero .big small{font-size:1rem;font-weight:700;margin-left:6px}
+.hero .next{margin-left:auto;min-width:220px;flex:1;max-width:420px}
+.hero .next p{margin:0 0 6px;font-size:.92rem}
+.bar{height:12px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--pink));border-radius:999px}
+.panel .bar{background:var(--soft)}
+
+/* habits */
+.hlist{display:flex;flex-direction:column;gap:10px;list-style:none;margin:0;padding:0}
+.hrow{display:flex;align-items:center;gap:14px;border:2px solid var(--line);border-radius:18px;padding:10px 12px}
+.hrow.d{background:var(--mint-soft);border-color:#A6E8D2}
+.hrow.p{background:var(--sun-soft);border-color:#F5DD8A}
+.slot{flex:none;width:56px;height:56px;border-radius:50%;border:3px dashed #D4C6F2;display:grid;place-items:center;font-family:var(--display);font-size:1.4rem;color:#B9A9E6}
+.hrow.p .slot{border-color:var(--sun);color:var(--gold);animation:wob 1.6s ease-in-out infinite}
+.hrow.d .slot{border:none}
+.slot svg{width:60px;height:60px}
+.hrow.d .slot svg{animation:stamp .45s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes stamp{from{transform:scale(1.8) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes wob{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.hname{flex:1;min-width:0;font-weight:700;font-size:1.08rem}
+.hname small{display:block;font-weight:500;font-size:.85rem;color:var(--muted)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn{border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:.98rem;background:var(--soft);color:var(--ink);white-space:nowrap}
+.btn.hot{background:var(--pink);color:#fff;box-shadow:0 3px 0 #C92C6E}
+.btn.go{background:var(--mint);color:#fff;box-shadow:0 3px 0 #0B7E60}
+.btn.grape{background:var(--grape);color:#fff;box-shadow:0 3px 0 #4E33B8}
+.btn.ghost{background:transparent;border:2px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:.88rem}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;padding:4px;font-size:.88rem}
+
+/* sticker card */
+.book{background:var(--grape-soft);border-radius:18px;padding:14px}
+.book-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cell{aspect-ratio:1;border-radius:50%;border:2px dashed #CDBDF3;display:grid;place-items:center;max-width:100%}
+.cell svg{width:112%;height:112%}
+.cell.on{border:none}
+.fullcards{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.9rem;color:var(--muted)}
+.minicard{width:26px;height:34px;border-radius:6px;background:linear-gradient(160deg,var(--sun),var(--pink));box-shadow:0 2px 0 rgba(0,0,0,.12)}
+
+/* rewards */
+.rlist{display:flex;flex-direction:column;gap:10px;list-style:none;margin:0;padding:0}
+.rrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px;border:2px solid var(--line);border-radius:18px;padding:10px 12px}
+.cost{font-family:var(--display);font-weight:800;background:var(--sun-soft);border-radius:12px;padding:6px 10px;text-align:center;min-width:56px;font-variant-numeric:tabular-nums}
+.cost small{display:block;font-size:.7rem;font-weight:700;color:var(--muted)}
+.rrow .bar{grid-column:2/3}
+.rname{font-weight:700}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--sun-soft);color:#8A6300}
+
+/* week table */
+.tablewrap{overflow-x:auto}
+table.week{border-collapse:separate;border-spacing:4px;width:100%;min-width:520px;font-variant-numeric:tabular-nums}
+.week th{font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;padding:2px}
+.week th.hn{text-align:left;font-size:.92rem;color:var(--ink);white-space:nowrap;max-width:9em;overflow:hidden;text-overflow:ellipsis}
+.week td{text-align:center;height:36px}
+.week td svg{width:34px;height:34px;vertical-align:middle}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--line)}
+.q{font-family:var(--display);color:var(--gold);font-weight:800}
+.week th.today{color:var(--pink)}
+.week tfoot td{font-family:var(--display);font-weight:800;color:var(--grape)}
+
+/* feed */
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.feed li{display:flex;gap:10px;align-items:flex-start}
+.feed .n{flex:none;font-family:var(--display);font-weight:800;min-width:46px;text-align:center;border-radius:10px;padding:2px 6px;background:var(--mint-soft);color:var(--mint)}
+.feed .n.neg{background:var(--soft);color:var(--muted)}
+.feed .n.gold{background:var(--sun-soft);color:var(--gold)}
+.feed .t{color:var(--muted);font-size:.8rem}
+.note{display:block;margin-top:4px;background:var(--pink-soft);border-radius:4px 14px 14px 14px;padding:6px 12px;font-size:.95rem}
+.empty{color:var(--muted);text-align:center;padding:14px;border:2px dashed var(--line);border-radius:16px}
+
+/* parent */
+.ptabs{display:flex;gap:8px;flex-wrap:wrap}
+.ptab{border:2px solid var(--line);background:var(--card);border-radius:14px;padding:8px 16px;font-weight:700}
+.ptab[aria-pressed="true"]{background:var(--grape);border-color:var(--grape);color:#fff}
+.ptab .badge{display:inline-block;margin-left:6px;background:var(--pink);color:#fff;border-radius:999px;padding:0 8px;font-size:.8rem}
+.pbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;background:var(--grape-soft);border-radius:var(--r);padding:12px 16px}
+.pbar strong{font-family:var(--display)}
+.seg{display:inline-flex;background:var(--card);border-radius:999px;padding:3px;border:2px solid var(--line)}
+.seg button{border:none;background:none;border-radius:999px;padding:5px 14px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.req{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:2px solid var(--line);border-radius:16px;padding:10px 12px}
+.req .who{font-weight:800;font-family:var(--display);background:var(--soft);border-radius:999px;padding:2px 12px}
+.req .what{flex:1;min-width:10em;font-weight:700}
+.req .what small{display:block;color:var(--muted);font-weight:500}
+.field{width:100%;border:2px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff}
+.field:focus{border-color:var(--grape);outline:none}
+.erow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.erow.r{grid-template-columns:minmax(0,1fr) 90px auto}
+.stack{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:.9rem}
+.stepper{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stepper .preview{display:flex;gap:2px}
+.stepper .preview svg{width:44px;height:44px}
+label.lbl{font-weight:700;font-size:.92rem}
+
+/* pin pad */
+.modal{position:fixed;inset:0;background:rgba(43,35,80,.55);display:grid;place-items:center;z-index:30;padding:20px}
+.pad{background:var(--card);border-radius:28px;padding:24px;width:min(340px,100%);display:flex;flex-direction:column;gap:16px;align-items:center}
+.dots{display:flex;gap:14px}
+.dots i{width:18px;height:18px;border-radius:50%;border:3px solid var(--grape)}
+.dots i.f{background:var(--grape)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.keys button{border:none;background:var(--soft);border-radius:18px;padding:14px 0;font-family:var(--display);font-size:1.4rem;font-weight:800}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:10px 20px;font-weight:700;z-index:40;max-width:calc(100% - 32px);text-align:center}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:35}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true"><use href="#stk0"/></svg><div><h1>生活習慣貼紙本</h1><small>小學生練習營</small></div></div>
+    <nav class="kids" id="kids" aria-label="選擇小朋友"></nav>
+    <button class="pbtn" id="pbtn">家長模式</button>
+  </header>
+  <div id="banner"></div>
+  <main id="app" class="wrap"></main>
+</div>
+<div id="modal"></div>
+<div id="toast" class="toast" hidden></div>
+<canvas class="confetti" id="confetti" hidden></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="defs"></defs></svg>
+
+<script>
+/* ===== 生活習慣貼紙：共用規則（網站和 Apps Script 用同一份） ===== */
+var HC_KEEP_DAYS = 120, HC_FEED_MAX = 60, HC_REDEEM_MAX = 30;
+var HC_PARENT_OPS = { checkPin: 1, approve: 1, reject: 1, give: 1, revoke: 1, surprise: 1, redeemApprove: 1, redeemReject: 1, setHabits: 1, setRewards: 1, setCard: 1, setPin: 1 };
+var HC_CARD_SIZES = [10, 15, 20, 25, 30, 40, 50];
+
+function hcId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function hcDefaultHabits(grade) {
+  var list = grade >= 5
+    ? ['準時自己起床', '自己檢查聯絡簿', '先寫完功課再玩', '閱讀 30 分鐘', '運動 30 分鐘', '3C 時間守約定', '幫忙一件家事', '十點前上床']
+    : ['自己起床', '刷牙洗臉', '整理好書包', '寫完功課', '閱讀 15 分鐘', '玩具自己收好', '幫忙一件家事', '九點前上床'];
+  return list.map(function (n, i) { return { id: 'h' + (i + 1), name: n }; });
+}
+
+function hcDefaultRewards() {
+  return [
+    { id: 'r1', name: '多 15 分鐘遊戲時間', cost: 10 },
+    { id: 'r2', name: '選一個喜歡的點心', cost: 15 },
+    { id: 'r3', name: '週末晚餐由我決定', cost: 30 },
+    { id: 'r4', name: '和爸爸或媽媽單獨出去玩', cost: 50 },
+    { id: 'r5', name: '一個小禮物', cost: 100 }
+  ];
+}
+
+function hcSettings(s) {
+  s = s || {};
+  if (!s.pin) s.pin = '0000';
+  if (!s.rewards) s.rewards = hcDefaultRewards();
+  return s;
+}
+
+function hcEnsure(state, kid) {
+  var d = state.data[kid.id];
+  if (!d) {
+    d = { habits: hcDefaultHabits(kid.grade), log: {}, earned: 0, spent: 0, card: kid.grade >= 5 ? 30 : 20, feed: [], redeems: [], bonus: {} };
+    state.data[kid.id] = d;
+  }
+  return d;
+}
+
+function hcAddDays(ds, n) {
+  var p = ds.split('-');
+  return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10);
+}
+function hcValidDate(ds) { return /^\d{4}-\d{2}-\d{2}$/.test(ds || ''); }
+function hcPendingCost(d) { var s = 0; d.redeems.forEach(function (r) { if (r.st === 'p') s += r.cost; }); return s; }
+function hcStreak(d, hid, ds) { var n = 0; while (d.log[ds] && d.log[ds][hid] === 'd') { n++; ds = hcAddDays(ds, -1); } return n; }
+function hcHabitName(d, hid) { for (var i = 0; i < d.habits.length; i++) if (d.habits[i].id === hid) return d.habits[i].name; return ''; }
+function hcFeed(d, e) { d.feed.unshift(e); if (d.feed.length > HC_FEED_MAX) d.feed.length = HC_FEED_MAX; }
+
+function hcPrune(d, today) {
+  var cut = hcAddDays(today, -HC_KEEP_DAYS);
+  Object.keys(d.log).forEach(function (k) { if (k < cut) delete d.log[k]; });
+  Object.keys(d.bonus).forEach(function (k) { if (k.split('@')[1] < cut) delete d.bonus[k]; });
+  d.redeems = d.redeems.filter(function (r, i) { return r.st === 'p' || i < HC_REDEEM_MAX; });
+}
+
+/** 給網站看的資料：不含家長密碼 */
+function hcPublic(state) {
+  state.settings = hcSettings(state.settings);
+  state.kids.forEach(function (k) { hcEnsure(state, k); });
+  return {
+    kids: state.kids.map(function (k) { return { id: k.id, name: k.name, grade: k.grade }; }),
+    data: state.data,
+    settings: { rewards: state.settings.rewards, pinIsDefault: state.settings.pin === '0000' }
+  };
+}
+
+/** 套用一個動作。回傳 {ok, error, logs, kids, settings} */
+function hcApply(state, op, now) {
+  var out = { ok: true, logs: [], kids: {}, settings: false };
+  function fail(m) { return { ok: false, error: m }; }
+  if (!op || !op.type) return fail('沒有指定動作');
+  state.settings = hcSettings(state.settings);
+  if (HC_PARENT_OPS[op.type] && String(op.pin || '') !== String(state.settings.pin)) return fail('家長密碼不對');
+  var by = (op.by === '爸爸' || op.by === '媽媽') ? op.by : '爸媽';
+
+  if (op.type === 'checkPin') return out;
+  if (op.type === 'setPin') {
+    if (!/^\d{4}$/.test(op.newPin || '')) return fail('密碼要是 4 位數字');
+    state.settings.pin = op.newPin; out.settings = true; return out;
+  }
+  if (op.type === 'setRewards') {
+    var rs = (op.rewards || []).filter(function (r) { return r && String(r.name || '').trim() && +r.cost > 0; })
+      .slice(0, 20).map(function (r) { return { id: r.id || hcId('r'), name: String(r.name).trim().slice(0, 30), cost: Math.min(999, Math.round(+r.cost)) }; });
+    if (!rs.length) return fail('至少要有一個獎勵');
+    state.settings.rewards = rs; out.settings = true; return out;
+  }
+
+  var kid = null;
+  state.kids.forEach(function (k) { if (k.id === op.kidId) kid = k; });
+  if (!kid) return fail('找不到這位小朋友');
+  var d = hcEnsure(state, kid);
+  var today = hcValidDate(op.today) ? op.today : new Date(now).toISOString().slice(0, 10);
+  var ds = hcValidDate(op.date) ? op.date : today;
+  if (ds > today) return fail('不能選未來的日子');
+  var t = now;
+  var cur = d.log[ds] && d.log[ds][op.habitId];
+  var hname = hcHabitName(d, op.habitId);
+
+  function row(type, item, n, note) { out.logs.push({ time: t, kid: kid.name, type: type, item: item, n: n, note: note || '', kidId: kid.id }); }
+  function findRedeem() { var q = null; d.redeems.forEach(function (r) { if (r.id === op.redeemId && r.st === 'p') q = r; }); return q; }
+  function award(how) {
+    d.log[ds] = d.log[ds] || {};
+    d.log[ds][op.habitId] = 'd';
+    d.earned += 1;
+    var when = ds === today ? '' : '（' + ds.slice(5).replace('-', '/') + '）';
+    hcFeed(d, { t: t, k: 'habit', n: 1, text: (how === 'approve' ? by + '確認了：' : by + '給你貼紙：') + hname + when });
+    row(how === 'approve' ? '習慣・核可' : '習慣・直接頒發', hname + when, 1, by);
+    var s = hcStreak(d, op.habitId, ds), key = op.habitId + '@' + ds;
+    if (s > 0 && s % 7 === 0 && !d.bonus[key]) {
+      d.bonus[key] = 1; d.earned += 1;
+      hcFeed(d, { t: t, k: 'bonus', n: 1, text: '「' + hname + '」連續 ' + s + ' 天！多一張閃亮貼紙' });
+      row('連續獎勵', hname + '（連續 ' + s + ' 天）', 1, '');
+    }
+  }
+
+  switch (op.type) {
+    case 'request':
+      if (!hname) return fail('找不到這個習慣');
+      if (ds !== today) return fail('只能申請今天的貼紙');
+      if (cur === 'd') return fail('今天已經拿到這張貼紙了');
+      d.log[ds] = d.log[ds] || {}; d.log[ds][op.habitId] = 'p';
+      break;
+    case 'cancelRequest':
+      if (cur === 'p') delete d.log[ds][op.habitId];
+      break;
+    case 'approve':
+      if (cur !== 'p') return fail('這個申請已經處理過了');
+      award('approve');
+      break;
+    case 'give':
+      if (!hname) return fail('找不到這個習慣');
+      if (cur === 'd') return fail('這一格已經有貼紙了');
+      award('give');
+      break;
+    case 'reject':
+      if (cur === 'p') delete d.log[ds][op.habitId];
+      break;
+    case 'revoke':
+      if (cur !== 'd') return fail('這一格沒有貼紙');
+      delete d.log[ds][op.habitId];
+      d.earned = Math.max(d.spent, d.earned - 1);
+      hcFeed(d, { t: t, k: 'fix', n: -1, text: by + '修正按錯的：「' + (hname || '習慣') + '」' + ds.slice(5).replace('-', '/') });
+      row('按錯修正', hname, -1, by);
+      break;
+    case 'surprise':
+      var n = Math.round(+op.n || 0);
+      if (n < 1 || n > 5) return fail('一次可以送 1 到 5 張');
+      var note = String(op.note || '').trim().slice(0, 60);
+      d.earned += n;
+      hcFeed(d, { t: t, k: 'gift', n: n, text: by + '送你 ' + n + ' 張驚喜貼紙', note: note, by: by });
+      row('驚喜貼紙', note, n, by);
+      break;
+    case 'redeemRequest':
+      var r = null;
+      state.settings.rewards.forEach(function (x) { if (x.id === op.rewardId) r = x; });
+      if (!r) return fail('找不到這個獎勵');
+      if (d.earned - d.spent - hcPendingCost(d) < r.cost) return fail('貼紙還不夠喔');
+      d.redeems.unshift({ id: hcId('x'), rid: r.id, name: r.name, cost: r.cost, st: 'p', t: t });
+      break;
+    case 'redeemCancel':
+      var q1 = findRedeem();
+      if (q1) d.redeems.splice(d.redeems.indexOf(q1), 1);
+      break;
+    case 'redeemApprove':
+      var q2 = findRedeem();
+      if (!q2) return fail('這個兌換已經處理過了');
+      if (d.earned - d.spent < q2.cost) return fail('貼紙不夠，不能兌換');
+      q2.st = 'd'; q2.done = t; d.spent += q2.cost;
+      hcFeed(d, { t: t, k: 'redeem', n: -q2.cost, text: '換到了：' + q2.name });
+      row('兌換獎勵', q2.name, -q2.cost, by);
+      break;
+    case 'redeemReject':
+      var q3 = findRedeem();
+      if (!q3) return fail('這個兌換已經處理過了');
+      q3.st = 'x';
+      hcFeed(d, { t: t, k: 'info', n: 0, text: by + '說「' + q3.name + '」這次先不換，貼紙還在你這裡' });
+      break;
+    case 'setHabits':
+      var hs = (op.habits || []).filter(function (h) { return h && String(h.name || '').trim(); })
+        .slice(0, 12).map(function (h) { return { id: h.id || hcId('h'), name: String(h.name).trim().slice(0, 20) }; });
+      if (!hs.length) return fail('至少要有一個習慣');
+      d.habits = hs;
+      break;
+    case 'setCard':
+      var c = Math.round(+op.card);
+      if (HC_CARD_SIZES.indexOf(c) < 0) return fail('格數不對');
+      d.card = c;
+      break;
+    default:
+      return fail('不認得的動作');
+  }
+  out.kids[kid.id] = true;
+  hcPrune(d, today);
+  return out;
+}
+
+
+/* ================= 貼紙圖案 ================= */
+const STK=[
+ {bg:'#FFF1B8',art:()=>`<polygon points="${starPts(24,24.5,13,5.6)}" fill="#FFC22E" stroke="#E29A00" stroke-width="1.6" stroke-linejoin="round"/><circle cx="20" cy="21" r="1.6" fill="#fff"/>`},
+ {bg:'#FFD9E9',art:()=>`<path d="M24 35C13 28 10.5 21.5 13.6 17.3c3-4 8.2-3.4 10.4.6 2.2-4 7.4-4.6 10.4-.6 3.1 4.2.6 10.7-10.4 17.7z" fill="#FF4F96" stroke="#D02E72" stroke-width="1.5"/><ellipse cx="18" cy="20" rx="2" ry="1.4" fill="#fff" opacity=".8"/>`},
+ {bg:'#FFE6CC',art:()=>`<polygon points="13.5,21 15.5,10 22.5,16" fill="#FF9F43"/><polygon points="34.5,21 32.5,10 25.5,16" fill="#FF9F43"/><ellipse cx="24" cy="25" rx="11.5" ry="9.8" fill="#FFB25C"/><circle cx="19.5" cy="24" r="1.7" fill="#2B2350"/><circle cx="28.5" cy="24" r="1.7" fill="#2B2350"/><polygon points="22.6,27.4 25.4,27.4 24,29" fill="#FF4F96"/><path d="M11 27h6M11 30l6-1M37 27h-6M37 30l-6-1" stroke="#9A5A1C" stroke-width=".9" stroke-linecap="round"/>`},
+ {bg:'#F3E3CF',art:()=>`<ellipse cx="14.5" cy="22" rx="4" ry="7.5" fill="#8A5A2E" transform="rotate(18 14.5 22)"/><ellipse cx="33.5" cy="22" rx="4" ry="7.5" fill="#8A5A2E" transform="rotate(-18 33.5 22)"/><circle cx="24" cy="25" r="10" fill="#D9A066"/><ellipse cx="24" cy="29.5" rx="5.6" ry="4" fill="#F6DDB8"/><ellipse cx="24" cy="27.6" rx="2.2" ry="1.5" fill="#2B2350"/><circle cx="20" cy="23" r="1.6" fill="#2B2350"/><circle cx="28" cy="23" r="1.6" fill="#2B2350"/><path d="M24 29v2" stroke="#2B2350" stroke-width="1"/>`},
+ {bg:'#D3F5EA',art:()=>`<ellipse cx="24" cy="29.5" rx="7.5" ry="6.3" fill="#14A982"/><circle cx="15.5" cy="21.5" r="3.2" fill="#14A982"/><circle cx="20.5" cy="16.5" r="3.4" fill="#14A982"/><circle cx="27.5" cy="16.5" r="3.4" fill="#14A982"/><circle cx="32.5" cy="21.5" r="3.2" fill="#14A982"/>`},
+ {bg:'#FFE3F1',art:()=>[0,72,144,216,288].map(a=>{const r=a*Math.PI/180;return `<circle cx="${(24+6.6*Math.sin(r)).toFixed(1)}" cy="${(24-6.6*Math.cos(r)).toFixed(1)}" r="5.4" fill="#FF7AB6"/>`}).join('')+`<circle cx="24" cy="24" r="4.4" fill="#FFC22E"/>`},
+ {bg:'#DCEBFF',art:()=>`<path d="M10.5 32a13.5 13.5 0 0 1 27 0" fill="none" stroke="#FF5C7A" stroke-width="3.4"/><path d="M14 32a10 10 0 0 1 20 0" fill="none" stroke="#FFC22E" stroke-width="3.4"/><path d="M17.5 32a6.5 6.5 0 0 1 13 0" fill="none" stroke="#14A982" stroke-width="3.4"/><circle cx="11" cy="33" r="3" fill="#fff"/><circle cx="14" cy="34" r="2.6" fill="#fff"/><circle cx="37" cy="33" r="3" fill="#fff"/><circle cx="34" cy="34" r="2.6" fill="#fff"/>`},
+ {bg:'#EDE3FF',art:()=>`<polygon points="21,19.5 27,19.5 24,6.5" fill="#FFC22E" stroke="#E29A00" stroke-width="1"/><path d="M22 15h4M22.8 12h2.4" stroke="#E29A00" stroke-width=".9"/><circle cx="24" cy="27" r="9.5" fill="#fff" stroke="#D9CCF5" stroke-width="1.2"/><circle cx="15.5" cy="22" r="3.6" fill="#FF7AB6"/><circle cx="14.5" cy="27.5" r="3.4" fill="#A98BFF"/><circle cx="16.5" cy="32.5" r="3" fill="#7FD8FF"/><path d="M24.5 26.5q2 1.6 4 0" fill="none" stroke="#2B2350" stroke-width="1.4" stroke-linecap="round"/><circle cx="30" cy="30" r="1.8" fill="#FFB3D0"/>`}
+];
+function starPts(cx,cy,R,r){let p=[];for(let i=0;i<10;i++){const a=Math.PI/5*i-Math.PI/2,rr=i%2?r:R;p.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1));}return p.join(' ');}
+document.getElementById('defs').innerHTML=STK.map((s,i)=>`<g id="stk${i}"><circle cx="24" cy="24" r="22" fill="#fff"/><circle cx="24" cy="24" r="19.5" fill="${s.bg}"/>${s.art()}</g>`).join('')
+ +`<g id="stkgold"><circle cx="24" cy="24" r="22" fill="#FFE07A"/><circle cx="24" cy="24" r="19.5" fill="#FFF6D6"/><polygon points="${starPts(24,24.5,14,6)}" fill="#FFC22E" stroke="#C98A00" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 14l3 1-1 3M38 33l2 2-3 1" stroke="#E2A400" stroke-width="1.5" fill="none"/></g>`;
+const stk=(i,cls='')=>`<svg viewBox="0 0 48 48" class="${cls}" aria-hidden="true" style="filter:drop-shadow(0 2px 1px rgba(43,35,80,.18))"><use href="#stk${typeof i==='number'?i%STK.length:i}"/></svg>`;
+
+/* ================= 共用小工具 ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>dstr(new Date());
+const WD='日一二三四五六';
+const md=ds=>{const p=ds.split('-');return (+p[1])+'/'+(+p[2]);};
+const wd=ds=>WD[new Date(ds+'T12:00:00').getDay()];
+const dayLabel=ds=>{const t=today();if(ds===t)return '今天';if(ds===hcAddDays(t,-1))return '昨天';if(ds===hcAddDays(t,-2))return '前天';return md(ds)+'（'+wd(ds)+'）';};
+function ago(ms){const s=(Date.now()-ms)/1000;if(s<60)return '剛剛';if(s<3600)return Math.floor(s/60)+' 分鐘前';if(s<86400)return Math.floor(s/3600)+' 小時前';const d=new Date(ms);return (d.getMonth()+1)+'/'+d.getDate();}
+function store(k,v){try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)||'null'); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; }}
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600);}
+
+/* ================= 資料來源：雲端（Apps Script）或示範 ================= */
+const CFG_KEY='practice-camp-cloud';            // 和練習營共用同一組雲端設定
+let CFG=store(CFG_KEY)||{url:'',key:''};
+let DEMO=null, demo=!CFG.url;
+let ST=null, kidId=store('habits-kid'), busy=false, loadErr='';
+let mode='kid', ptab='inbox', parent=null, pKid=null, pDate=null, idleT=null;
+let by=store('habits-by')||'媽媽';
+
+function makeDemo(){
+  const s={kids:[{id:'demo3',name:'小宇',grade:3},{id:'demo6',name:'小晴',grade:6}],data:{},settings:{}};
+  const t=today(), now=Date.now();
+  const run=(o,ago)=>hcApply(s,Object.assign({pin:'0000',today:t},o),now-ago);
+  s.kids.forEach((k,ki)=>{
+    for(let back=8;back>=1;back--){
+      const ds=hcAddDays(t,-back);
+      hcEnsure(s,k).habits.forEach((h,hi)=>{ if((hi*3+back*(ki+2))%5!==0) run({type:'give',kidId:k.id,habitId:h.id,date:ds,by:hi%2?'爸爸':'媽媽'},back*86400000); });
+    }
+    run({type:'give',kidId:k.id,habitId:'h1',date:t,by:'媽媽'},3*3600000);
+    run({type:'give',kidId:k.id,habitId:'h2',date:t,by:'爸爸'},2*3600000);
+    run({type:'request',kidId:k.id,habitId:'h4'},40*60000);
+  });
+  run({type:'surprise',kidId:'demo3',n:2,note:'謝謝你主動幫忙收碗筷，媽媽好開心！',by:'媽媽'},5*3600000);
+  run({type:'surprise',kidId:'demo6',n:1,note:'今天很有耐心地教弟弟寫功課',by:'爸爸'},26*3600000);
+  run({type:'redeemRequest',kidId:'demo6',rewardId:'r1'},20*60000);
+  return s;
+}
+
+async function load(){
+  if(demo){ if(!DEMO) DEMO=makeDemo(); ST=hcPublic(DEMO); loadErr=''; return; }
+  try{
+    const r=await fetch(CFG.url+(CFG.url.includes('?')?'&':'?')+'action=habitLoad&key='+encodeURIComponent(CFG.key));
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error||'讀取失敗');
+    ST=j.state; loadErr='';
+  }catch(e){ loadErr=e.message==='Failed to fetch'?'連不到雲端，請檢查網路':e.message; }
+}
+
+async function act(o,okMsg){
+  if(busy) return false;
+  busy=true; document.body.style.cursor='progress';
+  o.today=today(); if(parent){ o.pin=parent.pin; o.by=by; } bumpIdle();
+  let ok=false;
+  try{
+    if(demo){
+      const res=hcApply(DEMO,o,Date.now()); ST=hcPublic(DEMO);
+      if(!res.ok) toast(res.error); else ok=true;
+    }else{
+      if(!o.pin) toast('儲存中…');
+      const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify({key:CFG.key,action:'habitOp',op:o})});
+      const j=await r.json();
+      if(j.state) ST=j.state;
+      if(!j.ok) toast(j.error||'沒有存成功'); else ok=true;
+    }
+  }catch(e){ toast('沒有存成功，請檢查網路後再試一次'); }
+  busy=false; document.body.style.cursor='';
+  if(ok && okMsg) toast(okMsg);
+  render();
+  return ok;
+}
+
+/* ================= 計算 ================= */
+const D=id=>ST.data[id];
+const kidOf=id=>ST.kids.find(k=>k.id===id);
+const bal=d=>d.earned-d.spent;
+const avail=d=>bal(d)-hcPendingCost(d);
+function last7(){const t=today();return [6,5,4,3,2,1,0].map(n=>hcAddDays(t,-n));}
+function stickerFor(d,hid){const i=d.habits.findIndex(h=>h.id===hid);return i<0?0:i;}
+function pendingAll(){
+  const out=[];
+  ST.kids.forEach(k=>{const d=D(k.id);
+    Object.keys(d.log).sort().reverse().slice(0,14).forEach(ds=>Object.keys(d.log[ds]).forEach(hid=>{ if(d.log[ds][hid]==='p'&&hcHabitName(d,hid)) out.push({kind:'habit',k,ds,hid,name:hcHabitName(d,hid)}); }));
+    d.redeems.forEach(r=>{ if(r.st==='p') out.push({kind:'redeem',k,r}); });
+  });
+  return out;
+}
+
+/* ================= 畫面 ================= */
+function render(){
+  renderBanner();
+  if(!ST){ $('#app').innerHTML=`<div class="panel"><p class="sub">${loadErr?esc(loadErr):'讀取中…'}</p>${loadErr?'<button class="btn grape" id="retry">再試一次</button>':''}</div>`; $('#retry')&&($('#retry').onclick=boot); $('#kids').innerHTML=''; return; }
+  if(!ST.kids.length){ $('#kids').innerHTML=''; $('#app').innerHTML=`<div class="panel"><h2>還沒有小朋友</h2><p class="sub">請先打開練習營，讓小朋友建立自己的檔案（會存到同一份試算表），再回來這裡。</p></div>`; renderTop(); return; }
+  if(!kidOf(kidId)) kidId=ST.kids[0].id;
+  renderTop();
+  if(mode==='parent') renderParent(); else renderKid();
+}
+function renderBanner(){
+  const b=$('#banner'); let h='';
+  if(demo) h=`<div class="banner"><b>示範模式：</b>畫面上是範例資料，重新整理就會回到原樣。在練習營平板網站上打開時，會自動使用你的 Google 試算表。家長密碼示範用 0000。</div>`;
+  else if(loadErr && ST) h=`<div class="banner err">${esc(loadErr)}（畫面是上一次讀到的資料）</div>`;
+  b.innerHTML=h;
+}
+function face(k){const d=D(k.id);return `<svg class="face" viewBox="0 0 48 48" aria-hidden="true"><use href="#stk${k.grade>=5?7:2}"/></svg>`;}
+function renderTop(){
+  $('#kids').innerHTML=ST.kids.map(k=>`<button class="kidtab" data-kid="${k.id}" aria-pressed="${mode==='kid'&&k.id===kidId}">${face(k)}${esc(k.name)}<span class="cnt">${bal(D(k.id))}</span></button>`).join('');
+  document.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>{ kidId=b.dataset.kid; store('habits-kid',kidId); if(mode==='parent'){ mode='kid'; parent=null; clearTimeout(idleT); } render(); });
+  const pb=$('#pbtn'); pb.classList.toggle('on',mode==='parent');
+  const n=ST.kids.length?pendingAll().length:0;
+  pb.textContent=mode==='parent'?'回到小朋友畫面':(n?`家長模式（${n} 件待確認）`:'家長模式');
+}
+
+/* ---------- 孩子模式 ---------- */
+function renderKid(){
+  const k=kidOf(kidId), d=D(k.id), t=today(), log=d.log[t]||{};
+  const b=bal(d), doneToday=d.habits.filter(h=>log[h.id]==='d').length;
+  const rw=ST.settings.rewards.slice().sort((a,b)=>a.cost-b.cost);
+  const next=rw.find(r=>r.cost>avail(d));
+  const pend=d.redeems.filter(r=>r.st==='p');
+  $('#app').innerHTML=`
+  <section class="hero" aria-label="貼紙總覽">
+    <div><div class="date">${md(t)}（${wd(t)}）・今天拿到 ${doneToday} 張</div><div class="big">${b}<small>張貼紙</small></div></div>
+    <div class="next">${next?`<p>再 <b>${next.cost-avail(d)}</b> 張就能換「${esc(next.name)}」</p><div class="bar"><i style="width:${Math.min(100,avail(d)/next.cost*100)}%"></i></div>`:`<p><b>所有獎勵都可以換了！</b>去下面挑一個吧</p><div class="bar"><i style="width:100%"></i></div>`}</div>
+  </section>
+  <div class="grid">
+    <section class="panel" aria-labelledby="th"><div class="panel-head"><h2 id="th">今天的好習慣</h2><span class="sub">做到了就按，爸媽確認後貼上貼紙</span></div>
+      <ul class="hlist">${d.habits.map((h,i)=>{const s=log[h.id];
+        return `<li class="hrow ${s||''}"><span class="slot">${s==='d'?stk(i):s==='p'?'?':''}</span>
+          <span class="hname">${esc(h.name)}${s==='p'?'<small>等爸媽確認中…</small>':s==='d'?'<small>拿到了！</small>':''}</span>
+          <span class="acts">${!s?`<button class="btn hot" data-req="${h.id}">我做到了</button>`:s==='p'?`<button class="link" data-unreq="${h.id}">按錯了，取消</button>`:''}</span></li>`;}).join('')}</ul>
+    </section>
+    <div class="stack" style="gap:18px;min-width:0">
+      ${bookHTML(d)}
+      <section class="panel" aria-labelledby="rh"><div class="panel-head"><h2 id="rh">換獎勵</h2><span class="sub">可以用 ${avail(d)} 張</span></div>
+        ${pend.length?`<div class="stack">${pend.map(r=>`<div class="req"><span class="tag">等爸媽確認</span><span class="what">${esc(r.name)}<small>用 ${r.cost} 張貼紙</small></span><button class="link" data-uncancel="${r.id}">取消</button></div>`).join('')}</div>`:''}
+        <ul class="rlist">${rw.map(r=>{const ok=avail(d)>=r.cost;return `<li class="rrow"><span class="cost">${r.cost}<small>張</small></span><span class="rname">${esc(r.name)}</span><button class="btn ${ok?'go':'ghost'} sm" data-redeem="${r.id}" ${ok?'':'disabled'}>${ok?'我要換':'還差 '+(r.cost-avail(d))}</button><span class="bar"><i style="width:${Math.min(100,Math.max(0,avail(d))/r.cost*100)}%"></i></span></li>`;}).join('')}</ul>
+      </section>
+    </div>
+  </div>
+  ${weekHTML(d)}
+  ${feedHTML(d)}`;
+  document.querySelectorAll('[data-req]').forEach(b=>b.onclick=async()=>{ if(await act({type:'request',kidId:k.id,habitId:b.dataset.req},'送出了！等爸媽確認')) {} });
+  document.querySelectorAll('[data-unreq]').forEach(b=>b.onclick=()=>act({type:'cancelRequest',kidId:k.id,habitId:b.dataset.unreq,date:t},'已取消'));
+  document.querySelectorAll('[data-redeem]').forEach(b=>b.onclick=()=>act({type:'redeemRequest',kidId:k.id,rewardId:b.dataset.redeem},'送出了！等爸媽確認'));
+  document.querySelectorAll('[data-uncancel]').forEach(b=>b.onclick=()=>act({type:'redeemCancel',kidId:k.id,redeemId:b.dataset.uncancel},'已取消'));
+}
+function bookHTML(d){
+  const b=bal(d), C=d.card, full=Math.floor(b/C), fill=b%C===0&&b>0?C:b%C, fulls=b%C===0&&b>0?full-1:full;
+  const off=d.spent+fulls*C;
+  return `<section class="panel" aria-labelledby="bh"><div class="panel-head"><h2 id="bh">我的貼紙本</h2><span class="sub">一張卡 ${C} 格</span></div>
+    <div class="book"><div class="book-grid">${Array.from({length:C},(_,i)=>i<fill?`<span class="cell on">${stk(off+i)}</span>`:'<span class="cell"></span>').join('')}</div></div>
+    <div class="fullcards">${fulls>0?Array.from({length:Math.min(fulls,12)},()=>'<span class="minicard"></span>').join('')+` 已經集滿 ${fulls} 張卡`:fill===C?'這張卡集滿了！可以去換獎勵':`這張卡還差 ${C-fill} 格就集滿`}・總共得過 ${d.earned} 張</div>
+  </section>`;
+}
+function weekHTML(d){
+  const days=last7(), t=today();
+  const tot=days.map(ds=>d.habits.filter(h=>(d.log[ds]||{})[h.id]==='d').length);
+  return `<section class="panel" aria-labelledby="wh"><div class="panel-head"><h2 id="wh">這一週</h2><span class="sub">同一個習慣連續 7 天，會多一張閃亮貼紙</span></div>
+  <div class="tablewrap"><table class="week"><thead><tr><th></th>${days.map(ds=>`<th class="${ds===t?'today':''}">${ds===t?'今天':wd(ds)}<br>${md(ds)}</th>`).join('')}</tr></thead>
+  <tbody>${d.habits.map((h,i)=>`<tr><th class="hn" scope="row">${esc(h.name)}</th>${days.map(ds=>{const s=(d.log[ds]||{})[h.id];return `<td>${s==='d'?stk(i):s==='p'?'<span class="q">?</span>':'<span class="dot"></span>'}</td>`;}).join('')}</tr>`).join('')}</tbody>
+  <tfoot><tr><th class="hn">合計</th>${tot.map(n=>`<td>${n}</td>`).join('')}</tr></tfoot></table></div></section>`;
+}
+function feedHTML(d){
+  const f=d.feed.slice(0,8);
+  return `<section class="panel" aria-labelledby="fh"><h2 id="fh">最近的消息</h2>
+  ${f.length?`<ul class="feed">${f.map(e=>`<li><span class="n ${e.n<0?'neg':e.k==='bonus'||e.k==='gift'?'gold':''}">${e.n>0?'+'+e.n:e.n<0?e.n:'・'}</span><div>${esc(e.text)} <span class="t">${ago(e.t)}</span>${e.note?`<span class="note">${esc(e.by||'')}${e.by?'：':''}${esc(e.note)}</span>`:''}</div></li>`).join('')}</ul>`:'<p class="empty">還沒有消息。做到第一個好習慣，就會出現在這裡。</p>'}</section>`;
+}
+
+/* ---------- 家長模式 ---------- */
+function bumpIdle(){ clearTimeout(idleT); if(parent) idleT=setTimeout(()=>{ parent=null; mode='kid'; render(); toast('太久沒動作，已離開家長模式'); },10*60000); }
+function openPin(){
+  let code='';
+  const m=$('#modal');
+  const draw=()=>{ m.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="輸入家長密碼"><div class="pad" id="pad"><h2>家長密碼</h2><p class="sub">輸入 4 位數字</p><div class="dots">${[0,1,2,3].map(i=>`<i class="${i<code.length?'f':''}"></i>`).join('')}</div>
+    <div class="keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join('')}<button data-k="x" aria-label="關閉">✕</button><button data-k="0">0</button><button data-k="b" aria-label="刪除">⌫</button></div></div></div>`;
+    m.querySelectorAll('[data-k]').forEach(b=>b.onclick=key.bind(null,b.dataset.k)); };
+  async function key(k){
+    if(k==='x'){ m.innerHTML=''; return; }
+    if(k==='b'){ code=code.slice(0,-1); draw(); return; }
+    if(code.length>=4) return;
+    code+=k; draw();
+    if(code.length===4){
+      parent={pin:code};
+      const ok=await act({type:'checkPin'});
+      if(ok){ m.innerHTML=''; mode='parent'; ptab=pendingAll().length?'inbox':'give'; pKid=kidId; pDate=today(); render(); bumpIdle(); }
+      else{ parent=null; code=''; draw(); $('#pad').classList.add('shake'); }
+    }
+  }
+  draw();
+}
+function renderParent(){
+  const pend=pendingAll();
+  $('#app').innerHTML=`
+  <div class="pbar"><strong>家長模式</strong><span class="sub">我是</span>
+    <span class="seg" role="group" aria-label="我是誰">${['媽媽','爸爸'].map(w=>`<button data-by="${w}" aria-pressed="${by===w}">${w}</button>`).join('')}</span>
+    <span class="sub" style="margin-left:auto">10 分鐘沒動作會自動離開</span></div>
+  ${ST.settings.pinIsDefault?'<div class="banner">家長密碼還是 0000，小朋友很容易猜到。請到「設定」改掉。</div>':''}
+  <nav class="ptabs" aria-label="家長功能">
+    ${[['inbox','待確認',pend.length],['give','發貼紙'],['gift','驚喜貼紙'],['settings','設定']].map(([id,l,n])=>`<button class="ptab" data-pt="${id}" aria-pressed="${ptab===id}">${l}${n?`<span class="badge">${n}</span>`:''}</button>`).join('')}
+  </nav>
+  <section class="panel" id="pbody"></section>`;
+  document.querySelectorAll('[data-by]').forEach(b=>b.onclick=()=>{ by=b.dataset.by; store('habits-by',by); render(); });
+  document.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{ ptab=b.dataset.pt; render(); });
+  ({inbox:pInbox,give:pGive,gift:pGift,settings:pSettings})[ptab]($('#pbody'),pend);
+}
+function kidPicker(cur){ return `<span class="seg" role="group" aria-label="選小朋友">${ST.kids.map(k=>`<button data-pk="${k.id}" aria-pressed="${k.id===cur}">${esc(k.name)}</button>`).join('')}</span>`; }
+function wirePicker(el,cb){ el.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{ pKid=b.dataset.pk; cb(); }); }
+
+function pInbox(el,pend){
+  el.innerHTML=`<div class="panel-head"><h2>待確認</h2>${pend.filter(p=>p.kind==='habit').length>1?'<button class="btn go sm" id="allok">習慣全部核可</button>':''}</div>
+  ${pend.length?`<div class="stack">${pend.map((p,i)=>p.kind==='habit'
+    ?`<div class="req"><span class="who">${esc(p.k.name)}</span><span class="what">${esc(p.name)}<small>${dayLabel(p.ds)}說「我做到了」</small></span><span class="acts"><button class="btn go sm" data-ok="${i}">核可，給貼紙</button><button class="btn ghost sm" data-no="${i}">退回</button></span></div>`
+    :`<div class="req"><span class="who">${esc(p.k.name)}</span><span class="what">想換：${esc(p.r.name)}<small>用 ${p.r.cost} 張（現在有 ${bal(D(p.k.id))} 張）・${ago(p.r.t)}</small></span><span class="acts"><button class="btn grape sm" data-ok="${i}">可以換</button><button class="btn ghost sm" data-no="${i}">這次先不要</button></span></div>`).join('')}</div>`
+  :'<p class="empty">目前沒有要確認的事。小朋友按「我做到了」或「我要換」之後，會出現在這裡。</p>'}`;
+  const doOk=p=>p.kind==='habit'?act({type:'approve',kidId:p.k.id,habitId:p.hid,date:p.ds},`已給${p.k.name}貼紙`):act({type:'redeemApprove',kidId:p.k.id,redeemId:p.r.id},`${p.k.name}換到了「${p.r.name}」`);
+  el.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>doOk(pend[+b.dataset.ok]));
+  el.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{const p=pend[+b.dataset.no]; p.kind==='habit'?act({type:'reject',kidId:p.k.id,habitId:p.hid,date:p.ds},'已退回'):act({type:'redeemReject',kidId:p.k.id,redeemId:p.r.id},'已婉拒，貼紙留在小朋友那裡');});
+  const all=el.querySelector('#allok'); if(all) all.onclick=async()=>{ for(const p of pend.filter(x=>x.kind==='habit')){ if(!await act({type:'approve',kidId:p.k.id,habitId:p.hid,date:p.ds})) break; } toast('全部核可完成'); };
+}
+
+function pGive(el){
+  if(!kidOf(pKid)) pKid=ST.kids[0].id;
+  const t=today(); if(!pDate||pDate>t||pDate<hcAddDays(t,-6)) pDate=t;
+  const d=D(pKid), log=d.log[pDate]||{};
+  el.innerHTML=`<div class="panel-head"><h2>發貼紙</h2><span class="sub">小朋友忘了按，或你親眼看到，可以直接給</span></div>
+  <div class="stepper">${kidPicker(pKid)}<span class="seg" role="group" aria-label="選日期">${[0,1,2].map(n=>{const ds=hcAddDays(t,-n);return `<button data-pd="${ds}" aria-pressed="${ds===pDate}">${dayLabel(ds)}</button>`;}).join('')}</span></div>
+  <ul class="hlist">${d.habits.map((h,i)=>{const s=log[h.id];return `<li class="hrow ${s||''}"><span class="slot">${s==='d'?stk(i):s==='p'?'?':''}</span><span class="hname">${esc(h.name)}${s==='p'?'<small>小朋友說做到了</small>':''}</span>
+    <span class="acts">${!s?`<button class="btn hot sm" data-g="${h.id}">給貼紙</button>`:s==='p'?`<button class="btn go sm" data-a="${h.id}">核可</button><button class="btn ghost sm" data-r="${h.id}">退回</button>`:`<button class="link" data-v="${h.id}">按錯了，收回</button>`}</span></li>`;}).join('')}</ul>`;
+  wirePicker(el,render);
+  el.querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>{ pDate=b.dataset.pd; render(); });
+  const base=hid=>({kidId:pKid,habitId:hid,date:pDate});
+  el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>act(Object.assign({type:'give'},base(b.dataset.g)),'貼上了！'));
+  el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>act(Object.assign({type:'approve'},base(b.dataset.a)),'貼上了！'));
+  el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>act(Object.assign({type:'reject'},base(b.dataset.r)),'已退回'));
+  el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>act(Object.assign({type:'revoke'},base(b.dataset.v)),'已收回這一張'));
+}
+
+let giftN=1, giftNote='';
+function pGift(el){
+  if(!kidOf(pKid)) pKid=ST.kids[0].id;
+  const k=kidOf(pKid);
+  el.innerHTML=`<div class="panel-head"><h2>驚喜貼紙</h2><span class="sub">習慣表以外的好表現，附一句話，小朋友會在「最近的消息」看到</span></div>
+  <div class="stepper">${kidPicker(pKid)}</div>
+  <div class="stepper"><label class="lbl">送幾張</label><span class="seg" role="group" aria-label="張數">${[1,2,3,4,5].map(n=>`<button data-n="${n}" aria-pressed="${n===giftN}">${n}</button>`).join('')}</span><span class="preview">${Array.from({length:giftN},()=>stk('gold')).join('')}</span></div>
+  <div class="stack"><label class="lbl" for="gnote">想對${esc(k.name)}說的話（可以不寫）</label>
+  <div class="chips">${['主動幫忙做家事','照顧家人','很有禮貌','勇敢嘗試新事物','比上次進步了','遇到困難沒有放棄'].map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join('')}</div>
+  <textarea class="field" id="gnote" rows="2" maxlength="60" placeholder="例如：謝謝你今天主動幫忙倒垃圾">${esc(giftNote)}</textarea></div>
+  <div><button class="btn hot" id="gsend">送給${esc(k.name)} ${giftN} 張</button></div>`;
+  wirePicker(el,render);
+  const ta=el.querySelector('#gnote'); ta.oninput=()=>giftNote=ta.value;
+  el.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{ giftN=+b.dataset.n; render(); });
+  el.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ giftNote=(giftNote?giftNote+'，':'')+b.dataset.c; ta.value=giftNote; });
+  el.querySelector('#gsend').onclick=async()=>{ if(await act({type:'surprise',kidId:pKid,n:giftN,note:giftNote},`送出了！${k.name}多了 ${giftN} 張`)){ giftNote=''; giftN=1; confetti(); render(); } };
+}
+
+let draftHabits=null, draftRewards=null;
+function pSettings(el){
+  if(!kidOf(pKid)) pKid=ST.kids[0].id;
+  const d=D(pKid), k=kidOf(pKid);
+  if(!draftHabits||draftHabits.kid!==pKid) draftHabits={kid:pKid,list:d.habits.map(h=>({...h}))};
+  if(!draftRewards) draftRewards=ST.settings.rewards.map(r=>({...r}));
+  el.innerHTML=`<h2>設定</h2>
+  <div class="stack"><div class="panel-head"><h3>習慣清單</h3>${kidPicker(pKid)}</div>
+    <p class="sub">最多 12 項。改名字不會影響已經拿到的貼紙；刪掉的項目，過去的紀錄也會從週表上消失。</p>
+    ${draftHabits.list.map((h,i)=>`<div class="erow"><input class="field" id="h-${i}" data-hi="${i}" value="${esc(h.name)}" maxlength="20" aria-label="習慣 ${i+1}"><button class="btn ghost sm" data-hdel="${i}">刪除</button></div>`).join('')}
+    <div class="acts" style="justify-content:flex-start"><button class="btn ghost sm" id="hadd" ${draftHabits.list.length>=12?'disabled':''}>＋ 新增一項</button><button class="btn grape sm" id="hsave">儲存${esc(k.name)}的習慣</button></div>
+    <div class="stepper"><label class="lbl" for="card">${esc(k.name)}的貼紙卡一張幾格</label><select class="field" id="card" style="width:auto">${HC_CARD_SIZES.map(c=>`<option value="${c}" ${c===d.card?'selected':''}>${c} 格</option>`).join('')}</select></div>
+  </div>
+  <hr style="border:none;border-top:2px dashed var(--line);width:100%">
+  <div class="stack"><h3>獎勵清單（兩個小朋友共用）</h3>
+    ${draftRewards.map((r,i)=>`<div class="erow r"><input class="field" id="r-${i}" data-ri="${i}" value="${esc(r.name)}" maxlength="30" aria-label="獎勵名稱"><input class="field" id="rc-${i}" data-rc="${i}" type="number" min="1" max="999" value="${r.cost}" aria-label="需要幾張"><button class="btn ghost sm" data-rdel="${i}">刪除</button></div>`).join('')}
+    <div class="acts" style="justify-content:flex-start"><button class="btn ghost sm" id="radd">＋ 新增獎勵</button><button class="btn grape sm" id="rsave">儲存獎勵</button></div>
+  </div>
+  <hr style="border:none;border-top:2px dashed var(--line);width:100%">
+  <div class="stack"><h3>家長密碼</h3><div class="erow"><input class="field" id="newpin" inputmode="numeric" maxlength="4" placeholder="新的 4 位數字"><button class="btn grape sm" id="pinsave">更換</button></div></div>
+  <hr style="border:none;border-top:2px dashed var(--line);width:100%">
+  <div class="stack"><h3>雲端連線</h3><p class="sub">和練習營用同一組設定。平板上練習營已經設定好的話，這裡不用再填。</p>
+    <input class="field" id="curl" placeholder="https://script.google.com/macros/s/……/exec" value="${esc(CFG.url)}" aria-label="Apps Script 網址">
+    <input class="field" id="ckey" type="password" placeholder="家庭密碼" value="${esc(CFG.key)}" aria-label="家庭密碼">
+    <div class="acts" style="justify-content:flex-start"><button class="btn grape sm" id="csave">儲存並連線</button></div></div>`;
+  wirePicker(el,render);
+  el.querySelectorAll('[data-hi]').forEach(i=>i.oninput=()=>draftHabits.list[+i.dataset.hi].name=i.value);
+  el.querySelectorAll('[data-hdel]').forEach(b=>b.onclick=()=>{ draftHabits.list.splice(+b.dataset.hdel,1); render(); });
+  el.querySelector('#hadd').onclick=()=>{ draftHabits.list.push({name:''}); render(); const ins=el.ownerDocument.querySelectorAll('[data-hi]'); ins[ins.length-1]&&ins[ins.length-1].focus(); };
+  el.querySelector('#hsave').onclick=async()=>{ if(await act({type:'setHabits',kidId:pKid,habits:draftHabits.list},'習慣清單已儲存')) draftHabits=null, render(); };
+  el.querySelector('#card').onchange=e=>act({type:'setCard',kidId:pKid,card:+e.target.value},'已更新');
+  el.querySelectorAll('[data-ri]').forEach(i=>i.oninput=()=>draftRewards[+i.dataset.ri].name=i.value);
+  el.querySelectorAll('[data-rc]').forEach(i=>i.oninput=()=>draftRewards[+i.dataset.rc].cost=+i.value);
+  el.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{ draftRewards.splice(+b.dataset.rdel,1); render(); });
+  el.querySelector('#radd').onclick=()=>{ draftRewards.push({name:'',cost:20}); render(); };
+  el.querySelector('#rsave').onclick=async()=>{ if(await act({type:'setRewards',rewards:draftRewards},'獎勵清單已儲存')){ draftRewards=null; render(); } };
+  el.querySelector('#pinsave').onclick=async()=>{ const v=el.querySelector('#newpin').value.trim(); if(!/^\d{4}$/.test(v)){ toast('密碼要是 4 位數字'); return; } if(await act({type:'setPin',newPin:v},'家長密碼已更換')){ parent.pin=v; } };
+  el.querySelector('#csave').onclick=async()=>{ CFG={url:el.querySelector('#curl').value.trim(),key:el.querySelector('#ckey').value}; store(CFG_KEY,CFG); demo=!CFG.url; parent=null; mode='kid'; ST=null; render(); await load(); render(); toast(loadErr?loadErr:'已連線，請重新輸入家長密碼'); };
+}
+
+/* ---------- 彩帶 ---------- */
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c=$('#confetti'), x=c.getContext('2d'); c.hidden=false; c.width=innerWidth; c.height=innerHeight;
+  const cols=['#FF4F96','#FFC22E','#14A982','#3B82F6','#7454E8'];
+  const ps=Array.from({length:90},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.4,v:2+Math.random()*3,a:Math.random()*6,s:6+Math.random()*6,c:cols[Math.floor(Math.random()*5)]}));
+  let f=0;(function step(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.y+=p.v;p.a+=.1;x.fillStyle=p.c;x.save();x.translate(p.x+Math.sin(p.a)*8,p.y);x.rotate(p.a);x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore();});if(++f<140)requestAnimationFrame(step);else c.hidden=true;})();
+}
+
+/* ---------- 開始 ---------- */
+$('#pbtn').onclick=()=>{ if(!ST) return; if(mode==='parent'){ mode='kid'; parent=null; clearTimeout(idleT); render(); } else openPin(); };
+let lastDone={};
+async function boot(){ render(); await load(); render(); }
+setInterval(async()=>{
+  if(demo||busy||document.visibilityState!=='visible') return;
+  const a=document.activeElement; if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+  if(mode==='parent'&&ptab==='settings') return;
+  await load(); render();
+},30000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&!demo&&!busy){ load().then(render); } });
+boot();
+</script>
