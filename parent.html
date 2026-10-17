@@ -187,9 +187,10 @@ main.wrap { padding-block: 16px 48px; display: grid; gap: 18px }
   <form class="dialog" id="setForm">
     <h2>連線設定</h2>
     <p class="sub" style="margin:0">填一次就好，這台手機或電腦會記住。資料只會傳到你自己的 Google 試算表。</p>
-    <label for="cfgUrl">Apps Script 網址（…/exec）<input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
     <label for="cfgKey">家庭密碼（和平板設定的一樣）<input id="cfgKey" type="password" autocomplete="off"></label>
     <label for="cfgPin">家長密碼（生活習慣的 4 位數字）<input id="cfgPin" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+    <details><summary class="sub" style="cursor:pointer;margin:0">進階：Apps Script 網址（已內建，通常不用改）</summary>
+      <label for="cfgUrl" style="margin-top:6px"><input id="cfgUrl" type="url" autocomplete="off"></label></details>
     <div class="err" id="setErr"></div>
     <div class="btns">
       <button class="btn plain" type="button" id="useDemo">先看示範資料</button>
@@ -322,11 +323,13 @@ let kidIdx = store.get('kid', 0);
 let basis = store.get('basis', 'recent');
 let onlyOpen = false;
 
-function cfg() { return store.get('cfg', { url: '', key: '', pin: '' }); }
+// 家裡的 Apps Script 網址（已內建，家長只要輸入兩組密碼）
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycby08Qans1TJG6zTa5p-2edeO0aiy_QYQ4oJgckxf430MwZ3aobZWQcZ14nFk061Ah3z/exec';
+function cfg() { const c = store.get('cfg', { url: '', key: '', pin: '' }); if (!c.url) c.url = DEFAULT_URL; return c; }
 
 async function load() {
   const c = cfg();
-  if (!c.url) return useDemo('還沒有連線到你的試算表，下面是示範資料。');
+  if (!c.key || !c.pin) { useDemo('第一次使用：請按「去連線」輸入家庭密碼和家長密碼。下面先顯示示範資料。'); openSettings(); return; }
   $('updated').textContent = '讀取中…';
   try {
     const res = await fetch(c.url, { method: 'POST', body: JSON.stringify({ key: c.key, pin: c.pin, action: 'dashboard' }) });
@@ -528,7 +531,7 @@ document.addEventListener('click', e => {
 function openSettings() {
   const c = cfg();
   $('cfgUrl').value = c.url; $('cfgKey').value = c.key; $('cfgPin').value = c.pin; $('setErr').textContent = '';
-  $('setBox').hidden = false; $('cfgUrl').focus();
+  $('setBox').hidden = false; $('cfgKey').focus();
 }
 $('openSet').onclick = openSettings;
 $('reload').onclick = load;
@@ -537,11 +540,11 @@ $('setBox').addEventListener('click', e => { if (e.target === $('setBox')) $('se
 document.addEventListener('keydown', e => { if (e.key === 'Escape') $('setBox').hidden = true; });
 $('setForm').addEventListener('submit', e => {
   e.preventDefault();
-  const url = $('cfgUrl').value.trim(), key = $('cfgKey').value.trim(), pin = $('cfgPin').value.trim();
+  const url = $('cfgUrl').value.trim() || DEFAULT_URL, key = $('cfgKey').value.trim(), pin = $('cfgPin').value.trim();
   if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { $('setErr').textContent = '網址要是 https://script.google.com/ 開頭、/exec 結尾。'; return; }
   if (!key) { $('setErr').textContent = '請填家庭密碼。'; return; }
   if (!/^\d{4}$/.test(pin)) { $('setErr').textContent = '家長密碼是 4 位數字。'; return; }
-  store.set('cfg', { url, key, pin });
+  store.set('cfg', { url: url === DEFAULT_URL ? '' : url, key, pin });
   $('setBox').hidden = true;
   load();
 });
