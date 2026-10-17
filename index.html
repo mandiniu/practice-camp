@@ -228,6 +228,34 @@ button.chip{cursor:pointer;border:none}
 .pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 延伸題：題組、是非、配合、看圖 */
+.lvtag.ext{background:linear-gradient(90deg,#F2994A,#E8408E)}
+.btn.ext{background:linear-gradient(90deg,#F2994A,#E8408E);color:#fff}
+.lesson .lbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.lesson .lbtns .btn{padding:8px 14px;font-size:.95rem}
+.bar.ext i{background:linear-gradient(90deg,#F2994A,#E8408E)}
+.ctx{background:var(--card);border:2px dashed var(--line);border-radius:14px;padding:12px 14px;margin-top:14px;line-height:1.7;font-size:1.05rem}
+.ctx table{border-collapse:collapse;width:100%;margin-top:6px;font-size:.95rem}
+.ctx td,.ctx th{border:1px solid var(--line);padding:4px 8px;text-align:left}
+.qimg{display:flex;justify-content:center;margin:0 0 14px}
+.qimg svg{width:100%;max-width:520px;height:auto}
+.opts.pics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.pics .opt{display:grid;justify-items:center;gap:4px;text-align:center;padding:8px}
+.opts.pics .opt svg{width:100%;max-width:220px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.legend span{background:var(--soft);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:700}
+.mparts{display:grid;gap:10px}
+.mpart{background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;gap:8px}
+.mpart.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--card))}
+.mpart.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card))}
+.ms{font-size:1.08rem;line-height:1.55}
+.mchips{display:flex;flex-wrap:wrap;gap:8px}
+.mchip{min-width:52px;border-radius:12px;padding:8px 14px;font-weight:800;font-size:1.05rem;background:var(--card);border:2px solid var(--line);color:var(--ink)}
+.mchips.tf .mchip{min-width:72px;font-size:1.2rem}
+.mchip.sel{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.mchip.ans{box-shadow:0 0 0 3px var(--good)}
+.mpart.wrong .mchip.sel:not(.ans){background:var(--bad);border-color:var(--bad)}
+.pwhy{font-size:.92rem;background:var(--card);border-radius:10px;padding:6px 10px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -450,6 +478,7 @@ const GEAR = {
   trophy:  {slot:'hand', reward:true, h:()=>outlined(`<path d="M-10 -40 L18 -40 L16 -22 Q4 -12 -8 -22Z" fill="#FFE08A"/><path d="M-10 -36 Q-22 -36 -18 -26 Q-14 -22 -8 -24 M18 -36 Q30 -36 26 -26 Q22 -22 16 -24" fill="none"/><rect x="0" y="-16" width="8" height="10" fill="#FFE08A"/><rect x="-8" y="-6" width="24" height="8" rx="2" fill="#C99B5A"/>`)+star(4,-32,5,'#FFFFFF')},
   book:    {slot:'hand', reward:true, h:()=>outlined(`<rect x="-14" y="-26" width="30" height="36" rx="3" fill="#9FC8F5"/><rect x="-10" y="-26" width="4" height="36" fill="#7FB0EA"/>`)+`<path d="M0 -14 L10 -14 M0 -6 L10 -6" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>`},
   brush:   {slot:'hand', reward:true, h:()=>thick('M-4 10 L12 -34','#C79A6B',4)+outlined(`<path d="M10 -32 Q18 -46 16 -56 Q8 -46 8 -34Z" fill="#4E4658"/>`)},
+  magnet:  {slot:'hand', reward:true, h:()=>outlined(`<path d="M-10 -44 L-10 -18 A14 14 0 0 0 18 -18 L18 -44 L9 -44 L9 -18 A5 5 0 0 1 -1 -18 L-1 -44Z" fill="#E5484D"/><rect x="-10" y="-52" width="9" height="9" fill="#FFFFFF"/><rect x="9" y="-52" width="9" height="9" fill="#5B8DEF"/>`)},
   magnifier:{slot:'hand', reward:true, h:()=>thick('M-2 12 L8 -10','#7A5A3C',5)+`<circle cx="14" cy="-22" r="13" fill="#E4F6FF" ${ol(OL,4)}/>`},
 };
 // 背景
@@ -554,6 +583,7 @@ const bankOf=(k,s)=>((window.BANK||{})[termOf(k)]||{})[s]||[];
 
 const LV_NAME={1:'基礎',2:'陷阱題',3:'融會貫通'};
 const XP_FIRST={1:10,2:15,3:20}, XP_REPEAT=2, COIN_FIRST={1:10,2:15,3:15}, COIN_REPEAT=4;
+const XP_EXT=25, COIN_EXT=20, EXT_UNLOCK=0.7;   // 延伸題獎勵較多；基本題學會 70% 才開放
 const LEVELS=[
   {name:'練習生', req:{}},
   {name:'新人', req:{xp:300}},
@@ -600,6 +630,7 @@ const ITEMS=[
   {id:'magnifier',name:'放大鏡',slot:'hand',reward:true},{id:'gradcap',name:'博士帽',slot:'head',reward:true},
   {id:'herocape',name:'超人披風',slot:'back',reward:true},{id:'book',name:'故事書',slot:'hand',reward:true},
   {id:'roundglass',name:'學霸眼鏡',slot:'face',reward:true},{id:'brush',name:'毛筆',slot:'hand',reward:true},
+  {id:'magnet',name:'科學磁鐵',slot:'hand',reward:true},
 ];
 const isBg=id=>!!BGS[id];
 const MEDALS=[
@@ -612,6 +643,7 @@ const MEDALS=[
   {id:'perfect5',name:'完美五連',short:'五',desc:'累積 5 個全對回合',test:k=>k.perfects>=5,reward:{wings:'rainbow'}},
   {id:'trap20',name:'陷阱剋星',short:'陷',desc:'答對 20 題不同的陷阱題',test:k=>k.stats.trap>=20,reward:{item:'detective',item2:'magnifier'}},
   {id:'deep20',name:'融會貫通大師',short:'融',desc:'答對 20 題不同的融會貫通題',test:k=>k.stats.deep>=20,reward:{item:'gradcap'}},
+  {id:'ext20',name:'延伸挑戰王',short:'延',desc:'答對 20 題不同的延伸題',test:k=>(k.stats.ext||0)>=20,reward:{item:'magnet'}},
   {id:'fix10',name:'錯題終結者',short:'改',desc:'把 10 題錯題重新答對',test:k=>k.stats.fixed>=10,reward:{item:'herocape'}},
   {id:'streak3',name:'三天不間斷',short:'3',desc:'連續 3 天都有練習',test:k=>streak(k)>=3,reward:{animal:'rabbit'}},
   {id:'streak7',name:'一週全勤',short:'7',desc:'連續 7 天都有練習',test:k=>streak(k)>=7,reward:{animal:'unicorn'}},
@@ -629,7 +661,14 @@ function rewardText(r){ if(!r) return ''; if(r.animal) return '解鎖隱藏角�
 const $=s=>document.querySelector(s);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function hash(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return h.toString(36); }
-const qid=(subj,q)=>subj+'|'+hash((q.l||'')+'|'+q.q);
+const qtext=q=>q.q+(q.ctx?'|'+q.ctx:'')+(q.parts?'|'+q.parts.map(p=>p.s).join('|'):'');
+const qid=(subj,q)=>subj+'|'+hash((q.l||'')+'|'+qtext(q));
+// 延伸題：每課基本題（含原本的陷阱、融會貫通）學會 70% 才開放
+const basicOf=(k,s,l)=>bankOf(k,s).filter(q=>!q.ext&&(!l||q.l===l));
+const extOf=(k,s,l)=>bankOf(k,s).filter(q=>q.ext&&(!l||q.l===l));
+function basicRate(k,s,l){ const b=basicOf(k,s,l); return b.length? b.filter(q=>k.mastered.includes(qid(s,q))).length/b.length : 1; }
+const extOpen=(k,s,l)=>basicRate(k,s,l)>=EXT_UNLOCK;
+const usable=(k,s,q)=>!q.ext||extOpen(k,s,q.l);
 const lessonNo=l=>l?l.split(' ')[0]:'';
 function today(d=new Date()){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function streak(k){ const set=new Set(k.days); let n=0; const d=new Date(); if(!set.has(today(d))) d.setDate(d.getDate()-1); while(set.has(today(d))){ n++; d.setDate(d.getDate()-1); } return n; }
@@ -646,7 +685,7 @@ const KEY='practice-camp-v5', CFG_KEY='practice-camp-cloud';
 function newKid(name,grade,sem){
   return {id:'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), name, grade, sem, coins:0, xp:0, days:[],
     correct:{chinese:0,math:0,science:0,social:0,life:0}, rounds:{chinese:0,math:0,science:0,social:0,life:0},
-    perfects:0, seconds:0, medals:[], mastered:[], missed:[], stats:{trap:0,deep:0,fixed:0},
+    perfects:0, seconds:0, medals:[], mastered:[], missed:[], stats:{trap:0,deep:0,fixed:0,ext:0},
     animal:'cat', fur:'orange', wings:'none', animals:[], wingsOwned:[], owned:FREE_ITEMS.slice(),
     wear:{head:'starclip',face:null,neck:null,body:'tee',back:null,hand:null,bg:'meadow'}, setup:false, updated:0};
 }
@@ -654,7 +693,7 @@ function fixKid(k){
   const n=newKid(k.name||'小隊員',k.grade||3,k.sem||defaultSem());
   const out=Object.assign(n,k);
   out.correct=Object.assign(n.correct,k.correct||{}); out.rounds=Object.assign(n.rounds,k.rounds||{});
-  out.stats=Object.assign({trap:0,deep:0,fixed:0},k.stats||{}); out.wear=Object.assign({head:null,face:null,neck:null,body:null,back:null,hand:null,bg:'meadow'},k.wear||{});
+  out.stats=Object.assign({trap:0,deep:0,fixed:0,ext:0},k.stats||{}); out.wear=Object.assign({head:null,face:null,neck:null,body:null,back:null,hand:null,bg:'meadow'},k.wear||{});
   out.owned=[...new Set([...(k.owned||[]),...FREE_ITEMS])].filter(id=>ITEMS.some(i=>i.id===id));
   if(!ANIMALS[out.animal]) { out.animal='cat'; out.fur='orange'; }
   return out;
@@ -704,9 +743,10 @@ async function pullCloud(){
   }catch(e){ setCloud('error','連不上雲端：'+e.message+'（先用平板上的資料）'); return false; }
 }
 function setCloud(state,msg){ cloud={state,msg}; const el=$('#cloudDot'); if(el){ el.dataset.state=state; el.title=msg; el.textContent=state==='ok'?'雲端已同步':state==='error'?'離線中':state==='connecting'?'連線中':'只存在這台平板'; } }
-function logAnswer(q,chosen,ok){
+const plain=t=>String(t).replace(/<[^>]*>/g,'').trim();
+function logAnswer(q,chosen,right,ok){
   if(!cloudOn()) return;
-  logQueue.push({time:new Date().toISOString(), kid:S.name, kidId:S.id, term:termLabel(S), subject:SUBJECTS[q.subj||quiz.subj].name, lesson:q.l||'', unit:q.u, level:LV_NAME[q.lv||1], question:q.q, chosen:q.o[chosen], answer:q.o[q.a], ok});
+  logQueue.push({time:new Date().toISOString(), kid:S.name, kidId:S.id, term:termLabel(S), subject:SUBJECTS[q.subj||quiz.subj].name, lesson:q.l||'', unit:q.u, level:(q.ext?'延伸・':'')+LV_NAME[q.lv||1], question:plain((q.ctx?q.ctx+' ':'')+q.q), chosen, answer:right, ok});
 }
 
 /* ================= 角色 ================= */
@@ -870,74 +910,102 @@ function renderLearn(p){
     const got=bank.filter(q=>S.mastered.includes(qid(k,q))).length;
     return `<button class="subj" data-s="${k}" style="--c:${s.c}"><span class="glyph">${s.glyph}</span><span><h3>${s.name}</h3><p class="ver">${G.ver[k]}版・${termLabel(S)}・${lessonsOf(S,k).length} 課</p><div class="bar"><i style="width:${got/total*100}%"></i></div><p>已學會 ${got} / ${total} 題・各課混合出題</p></span></button>`; }).join('');
   p.innerHTML=`<h2>${esc(S.name)}，今天想練習哪一課？</h2>
-  <p class="sub">每回合 5 題：3 題基礎、2 題陷阱或融會貫通。第一次答對才有完整經驗值。</p>
+  <p class="sub">每一課先做「基本練習」，基本題學會 70% 就能開啟「延伸挑戰」：參考自修的題型出題，獎勵也比較多。第一次答對才拿得到完整的經驗值。</p>
   ${examHTML()}
   ${lessonsHTML()}
   <div class="section-t">各科總複習</div><div class="subjects">${cards}</div>
   ${S.missed.length?`<div class="actions" style="justify-content:flex-start"><button class="btn ghost" id="goReview">錯題本：還有 ${S.missed.length} 題要再練</button></div>`:''}`;
   p.querySelectorAll('.subj[data-s]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.s));
-  p.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.subj,null,b.dataset.lesson));
+  p.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.subj,null,b.dataset.lesson,b.dataset.mode));
   p.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>startExam(examsOf(S)[+b.dataset.exam]));
   const r=$('#goReview'); if(r) r.onclick=()=>{tab='review'; render();};
 }
 function lessonsHTML(){
   const rows=[];
   subjectsOf(S).forEach(k=>lessonsOf(S,k).forEach(l=>{
-    const qs=bankOf(S,k).filter(q=>q.l===l), got=qs.filter(q=>S.mastered.includes(qid(k,q))).length, c=n=>qs.filter(q=>(q.lv||1)===n).length;
-    rows.push(`<button class="lesson" data-subj="${k}" data-lesson="${esc(l)}" style="--c:${SUBJECTS[k].c}"><span class="pill">${SUBJECTS[k].name}・${lessonNo(l)}</span><b>${esc(l.split(' ').slice(1).join(' '))}</b><span class="lmeta">已學會 ${got} / ${qs.length} 題・基礎 ${c(1)}・陷阱 ${c(2)}・融會貫通 ${c(3)}</span><div class="bar"><i style="width:${got/qs.length*100}%"></i></div>${got===qs.length?'<span class="lmeta"><b>這課已全部學會！</b></span>':''}</button>`);
+    const b=basicOf(S,k,l), e=extOf(S,k,l), got=b.filter(q=>S.mastered.includes(qid(k,q))).length, egot=e.filter(q=>S.mastered.includes(qid(k,q))).length, rate=basicRate(S,k,l), open=rate>=EXT_UNLOCK;
+    rows.push(`<div class="lesson" style="--c:${SUBJECTS[k].c}"><span class="pill">${SUBJECTS[k].name}・${lessonNo(l)}</span><b>${esc(l.split(' ').slice(1).join(' '))}</b>
+      <span class="lmeta">基本題 已學會 ${got} / ${b.length}</span><div class="bar"><i style="width:${b.length?got/b.length*100:0}%"></i></div>
+      ${e.length?`<span class="lmeta">延伸題 ${open?`已學會 ${egot} / ${e.length}`:`${e.length} 題・基本題學會 70% 開放（目前 ${Math.floor(rate*100)}%）`}</span>${open?`<div class="bar ext"><i style="width:${egot/e.length*100}%"></i></div>`:''}`:''}
+      <div class="lbtns"><button class="btn hot" data-subj="${k}" data-lesson="${esc(l)}" data-mode="basic">基本練習</button>${e.length?`<button class="btn ${open?'ext':'ghost'}" data-subj="${k}" data-lesson="${esc(l)}" data-mode="ext" ${open?'':'disabled'}>${open?'延伸挑戰':'🔒 延伸挑戰'}</button>`:''}</div>
+      ${got===b.length&&egot===e.length?'<span class="lmeta"><b>這課已全部學會！</b></span>':''}</div>`);
   }));
   return rows.length?`<div class="section-t">照課本出題</div><div class="lessons">${rows.join('')}</div>`:`<div class="empty"><p>${termLabel(S)}的課本資料還沒上傳，上傳後題目會出現在這裡。</p></div>`;
 }
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function startQuiz(subj, onlyQs, lesson){
-  const bank=bankOf(S,subj);
+function orderBy(list,key){ const missed=shuffle(list.filter(q=>S.missed.includes(key(q)))), fresh=shuffle(list.filter(q=>!S.mastered.includes(key(q))&&!S.missed.includes(key(q)))), done=shuffle(list.filter(q=>S.mastered.includes(key(q)))); return [...missed,...fresh,...done]; }
+function startQuiz(subj, onlyQs, lesson, mode){
+  const bank=bankOf(S,subj), key=q=>qid(subj,q);
   const qs0 = onlyQs || (()=>{
-    const all=bank.filter(q=>!lesson || q.l===lesson);
-    const order=list=>{ const missed=shuffle(list.filter(q=>S.missed.includes(qid(subj,q)))), fresh=shuffle(list.filter(q=>!S.mastered.includes(qid(subj,q))&&!S.missed.includes(qid(subj,q)))), done=shuffle(list.filter(q=>S.mastered.includes(qid(subj,q)))); return [...missed,...fresh,...done]; };
-    const adv=order(all.filter(q=>(q.lv||1)>1)), basic=order(all.filter(q=>(q.lv||1)===1));
+    if(mode==='ext') return shuffle(orderBy(extOf(S,subj,lesson),key).slice(0,5));
+    const all=bank.filter(q=>(!lesson || q.l===lesson) && (mode==='basic'?!q.ext:usable(S,subj,q)));
+    const adv=orderBy(all.filter(q=>q.ext||(q.lv||1)>1),key), basic=orderBy(all.filter(q=>!q.ext&&(q.lv||1)===1),key);
     if(!adv.length) return basic.slice(0,5);
     const pickB=basic.slice(0,Math.max(3,5-adv.length)), pickA=adv.slice(0,5-pickB.length);
     return [...shuffle(pickB),...shuffle(pickA)];
   })();
   if(!qs0.length){ toast('這裡還沒有題目'); return; }
-  quiz={subj, qs:qs0.map(q=>({...q, subj:q.subj||subj, order:shuffle(q.o.map((_,j)=>j))})), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
+  quiz={subj, mode, qs:qs0.map(q=>({...q, subj:q.subj||subj, order:q.t==='multi'||q.keep?q.o.map((_,j)=>j):shuffle(q.o.map((_,j)=>j)), mp:q.parts?q.parts.map(()=>null):null})), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
   clearInterval(tick); tick=setInterval(()=>{ if(document.visibilityState==='visible'){ S.seconds++; if(S.seconds%30===0){ save(); checkMedals(); } } },1000);
   tab='learn'; render();
 }
 function stopQuiz(){ clearInterval(tick); tick=null; quiz=null; if(S) save(); }
+const PLAB=['(1)','(2)','(3)','(4)','(5)','(6)','(7)','(8)'];
 function renderQuiz(p){
   if(quiz.i>=quiz.qs.length) return renderResult(p);
-  const q=quiz.qs[quiz.i], n=quiz.qs.length, lv=q.lv||1, s=SUBJECTS[q.subj]; p.style.setProperty('--c',s.c);
+  const q=quiz.qs[quiz.i], n=quiz.qs.length, lv=q.lv||1, s=SUBJECTS[q.subj], multi=q.t==='multi', done=quiz.picked!==null; p.style.setProperty('--c',s.c);
   const dots=quiz.qs.map((_,i)=>`<i class="${i<quiz.results.length?(quiz.results[i]?'ok':'no'):(i===quiz.i?'now':'')}"></i>`).join('');
   let fb='';
-  if(quiz.picked!==null){
-    const ok=quiz.picked===q.a, g=quiz.last;
+  if(done){
+    const ok=quiz.results[quiz.i], g=quiz.last;
     const gain=g?`+${g.coins} 金幣・+${g.xp} 經驗值${g.repeat?'（已學會的題目）':''}`:'';
-    fb = ok ? `<div class="feedback good pop">${av(charSVG(S),'bounce')}<div><h3>${lv===2?'陷阱沒騙到你！':lv===3?'融會貫通，太厲害了！':'答對了！'}</h3><p class="note">${gain}</p><p>${q.why}</p></div></div>`
-      : `<div class="feedback bad pop">${av(charSVG(S),'droop')}<div><h3>差一點點！我們一起看看哪裡錯了</h3><p>你選了「${q.o[quiz.picked]}」，正確答案是「<b>${q.o[q.a]}</b>」。</p>${q.trap&&q.trap[quiz.picked]?`<div class="why"><b>你可能是這樣想的：</b>${q.trap[quiz.picked]}</div>`:''}<div class="why"><b>為什麼：</b>${q.why}</div><p class="note">這題已放進錯題本，之後再答對可以拿回經驗值。</p></div></div>`;
+    const nRight=multi?q.parts.filter((pt,j)=>q.mp[j]===pt.a).length:0;
+    if(multi) fb = ok ? `<div class="feedback good pop">${av(charSVG(S),'bounce')}<div><h3>${q.ext?'延伸題全對，太強了！':'全部答對！'}</h3><p class="note">${gain}</p><p>${q.why}</p></div></div>`
+      : `<div class="feedback bad pop">${av(charSVG(S),'droop')}<div><h3>答對 ${nRight} / ${q.parts.length} 小題，再看看錯的地方</h3><div class="why"><b>重點：</b>${q.why}</div><p class="note">要每一小題都對才算學會，這題已放進錯題本。</p></div></div>`;
+    else fb = ok ? `<div class="feedback good pop">${av(charSVG(S),'bounce')}<div><h3>${q.ext?'延伸題答對，太強了！':lv===2?'陷阱沒騙到你！':lv===3?'融會貫通，太厲害了！':'答對了！'}</h3><p class="note">${gain}</p><p>${q.why}</p></div></div>`
+      : `<div class="feedback bad pop">${av(charSVG(S),'droop')}<div><h3>差一點點！我們一起看看哪裡錯了</h3>${q.pic?'<p>上面<b style="color:var(--bad)">紅框</b>是你選的圖，<b style="color:var(--good)">綠框</b>是正確答案。</p>':`<p>你選了「${q.o[quiz.picked]}」，正確答案是「<b>${q.o[q.a]}</b>」。</p>`}${q.trap&&q.trap[quiz.picked]?`<div class="why"><b>你可能是這樣想的：</b>${q.trap[quiz.picked]}</div>`:''}<div class="why"><b>為什麼：</b>${q.why}</div><p class="note">這題已放進錯題本，之後再答對可以拿回經驗值。</p></div></div>`;
   }
-  p.innerHTML=`<div class="qhead"><span class="qtags">${lv>1?`<span class="lvtag lv${lv}">${LV_NAME[lv]}</span>`:''}<span class="pill">${s.name}・${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span><span class="qcount">第 ${quiz.i+1} / ${n} 題</span></span><div class="dots">${dots}</div></div>
+  const tag=q.ext?`<span class="lvtag ext">延伸題</span>`:(lv>1?`<span class="lvtag lv${lv}">${LV_NAME[lv]}</span>`:'');
+  let body='';
+  if(multi){
+    body=`${q.legend?`<div class="legend">${q.o.map(x=>`<span>${x}</span>`).join('')}</div>`:''}<div class="mparts">${q.parts.map((pt,j)=>{ const mine=q.mp[j]; let cls=''; if(done) cls=mine===pt.a?'right':'wrong';
+      return `<div class="mpart ${cls}"><div class="ms"><b>${PLAB[j]}</b> ${pt.s}</div><div class="mchips ${q.tf?'tf':''}">${q.o.map((lab,i)=>{ let c=''; if(mine===i) c='sel'; if(done&&i===pt.a) c+=' ans'; return `<button class="mchip ${c}" data-j="${j}" data-i="${i}" ${done?'disabled':''}>${q.legend?lab.split(' ')[0]:lab}</button>`;}).join('')}</div>${done&&pt.why&&mine!==pt.a?`<div class="pwhy">${pt.why}</div>`:''}</div>`; }).join('')}</div>`;
+  } else {
+    body=`<div class="opts ${q.pic?'pics':''}">${q.order.map(i=>{ let cls=''; if(done){ if(i===q.a) cls='right'; else if(i===quiz.picked) cls='wrong'; } return `<button class="opt ${cls}" data-i="${i}" ${done?'disabled':''}>${q.o[i]}</button>`;}).join('')}</div>`;
+  }
+  const allPicked=multi&&q.mp.every(x=>x!==null);
+  p.innerHTML=`<div class="qhead"><span class="qtags">${tag}<span class="pill">${s.name}・${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span><span class="qcount">第 ${quiz.i+1} / ${n} 題</span></span><div class="dots">${dots}</div></div>
+  ${q.ctx?`<div class="ctx">${q.ctx}</div>`:''}
   <div class="question">${q.q}</div>
-  <div class="opts">${q.order.map(i=>{ let cls=''; if(quiz.picked!==null){ if(i===q.a) cls='right'; else if(i===quiz.picked) cls='wrong'; } return `<button class="opt ${cls}" data-i="${i}" ${quiz.picked!==null?'disabled':''}>${q.o[i]}</button>`;}).join('')}</div>
+  ${q.img?`<div class="qimg">${q.img}</div>`:''}
+  ${body}
   ${fb}
-  <div class="actions"><button class="btn ghost" id="quitQ">離開這回合</button>${quiz.picked!==null?`<button class="btn hot" id="nextQ">${quiz.i===n-1?'看成績':'下一題'}</button>`:''}</div>`;
+  <div class="actions"><button class="btn ghost" id="quitQ">離開這回合</button>${multi&&!done?`<button class="btn hot" id="sendQ" ${allPicked?'':'disabled'}>${allPicked?'送出答案':'每一小題都要選喔'}</button>`:''}${done?`<button class="btn hot" id="nextQ">${quiz.i===n-1?'看成績':'下一題'}</button>`:''}</div>`;
   p.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  p.querySelectorAll('.mchip').forEach(b=>b.onclick=()=>{ q.mp[+b.dataset.j]=+b.dataset.i; const y=window.scrollY; render(); window.scrollTo(0,y); });
+  const sd=$('#sendQ'); if(sd) sd.onclick=submitMulti;
   $('#quitQ').onclick=()=>{ stopQuiz(); render(); };
-  const nx=$('#nextQ'); if(nx){ nx.onclick=()=>{quiz.i++; quiz.picked=null; quiz.last=null; render();}; nx.focus({preventScroll:true}); }
+  const nx=$('#nextQ'); if(nx){ nx.onclick=()=>{quiz.i++; quiz.picked=null; quiz.last=null; render(); window.scrollTo(0,0);}; nx.focus({preventScroll:true}); }
 }
-function answer(i){
-  const q=quiz.qs[quiz.i], id=qid(q.subj,q), lv=q.lv||1; quiz.picked=i;
-  const ok=i===q.a; quiz.results.push(ok);
+function answer(i){ const q=quiz.qs[quiz.i]; quiz.picked=i; const t=j=>q.pic?'第 '+(q.order.indexOf(j)+1)+' 張圖':plain(q.o[j]); commit(i===q.a, t(i), t(q.a)); }
+function submitMulti(){
+  const q=quiz.qs[quiz.i]; quiz.picked=-1;
+  const lab=i=>plain(q.o[i]).split(' ')[0];
+  commit(q.parts.every((pt,j)=>q.mp[j]===pt.a), q.mp.map((x,j)=>PLAB[j]+lab(x)).join(' '), q.parts.map((pt,j)=>PLAB[j]+lab(pt.a)).join(' '));
+}
+function commit(ok, chosenText, rightText){
+  const q=quiz.qs[quiz.i], id=qid(q.subj,q), lv=q.lv||1;
+  quiz.results.push(ok);
   const before=levelOf(S);
   if(!S.days.includes(today())) S.days.push(today());
   if(ok){
     const wasMastered=S.mastered.includes(id), wasMissed=S.missed.includes(id);
-    const xp=wasMastered?XP_REPEAT:XP_FIRST[lv], coins=wasMastered?COIN_REPEAT:COIN_FIRST[lv];
+    const xp=wasMastered?XP_REPEAT:(q.ext?XP_EXT:XP_FIRST[lv]), coins=wasMastered?COIN_REPEAT:(q.ext?COIN_EXT:COIN_FIRST[lv]);
     S.coins+=coins; S.xp+=xp; quiz.earned+=coins; quiz.xp+=xp; quiz.last={xp,coins,repeat:wasMastered};
-    if(!wasMastered){ quiz.fresh++; S.correct[q.subj]=(S.correct[q.subj]||0)+1; if(lv===2) S.stats.trap++; if(lv===3) S.stats.deep++; if(wasMissed) S.stats.fixed++; S.mastered.push(id); }
+    if(!wasMastered){ quiz.fresh++; S.correct[q.subj]=(S.correct[q.subj]||0)+1; if(lv===2) S.stats.trap++; if(lv===3) S.stats.deep++; if(q.ext) S.stats.ext=(S.stats.ext||0)+1; if(wasMissed) S.stats.fixed++; S.mastered.push(id); }
     S.missed=S.missed.filter(x=>x!==id);
   } else { if(!S.missed.includes(id)) S.missed.push(id); S.mastered=S.mastered.filter(x=>x!==id); }
-  logAnswer(q,i,ok);
+  logAnswer(q,chosenText,rightText,ok);
   save(); checkMedals(); render();
   const after=levelOf(S); if(after>before) setTimeout(()=>toast(`升級了！現在是「${LEVELS[after].name}」`),900);
 }
@@ -951,13 +1019,13 @@ function renderResult(p){
   ${quiz.exam?`<p class="sub">${quiz.exam}模擬考：答對 ${right} / ${n} 題。${weak.length?'要再加強：'+weak.join('、')+'。答錯的題目已經放進錯題本。':'全部答對，準備得很好！'}</p>`:''}
   <p class="sub">這回合拿到 ${quiz.earned} 金幣、${quiz.xp} 經驗值${right===n&&n>=5?'（含全對加碼）':''}。</p>
   <div class="actions" style="justify-content:center"><button class="btn hot" id="again">再玩一回合</button><button class="btn ghost" id="home">回練習場</button><button class="btn ghost" id="toShop">去商店看看</button></div></div>`;
-  const s=quiz.subj, ls=quiz.lesson, ex=quiz.examObj;
-  $('#again').onclick=()=>ex?startExam(ex):startQuiz(s,null,ls); $('#home').onclick=()=>{quiz=null; render();}; $('#toShop').onclick=()=>{quiz=null; tab='shop'; render();};
+  const s=quiz.subj, ls=quiz.lesson, md=quiz.mode, ex=quiz.examObj;
+  $('#again').onclick=()=>ex?startExam(ex):startQuiz(s,null,ls,md); $('#home').onclick=()=>{quiz=null; render();}; $('#toShop').onclick=()=>{quiz=null; tab='shop'; render();};
 }
 function renderReview(p){
   const groups=subjectsOf(S).map(k=>({k, qs:bankOf(S,k).filter(q=>S.missed.includes(qid(k,q)))})).filter(g=>g.qs.length);
   p.innerHTML=`<h2>錯題本</h2><p class="sub">答錯的題目會收在這裡，重新答對就會拿掉，還能拿回經驗值。</p>
-  ${groups.length?groups.map(g=>{const s=SUBJECTS[g.k];return `<div class="revgroup" style="--c:${s.c}"><div class="qhead"><h3>${s.name}・${g.qs.length} 題</h3><button class="btn hot" data-rev="${g.k}">練這 ${Math.min(5,g.qs.length)} 題</button></div><ul>${g.qs.map(q=>`<li><span class="pill">${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span> ${q.q}</li>`).join('')}</ul></div>`;}).join('')
+  ${groups.length?groups.map(g=>{const s=SUBJECTS[g.k];return `<div class="revgroup" style="--c:${s.c}"><div class="qhead"><h3>${s.name}・${g.qs.length} 題</h3><button class="btn hot" data-rev="${g.k}">練這 ${Math.min(5,g.qs.length)} 題</button></div><ul>${g.qs.map(q=>`<li><span class="pill">${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span> ${plain(q.q)}${q.parts?'（'+q.parts.length+' 小題）':''}</li>`).join('')}</ul></div>`;}).join('')
   :`<div class="empty">${av(charSVG(S))}<p>錯題本是空的，答錯的題目會出現在這裡。</p></div>`}`;
   p.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ const g=groups.find(x=>x.k===b.dataset.rev); startQuiz(g.k, shuffle(g.qs).slice(0,5)); });
 }
@@ -967,7 +1035,7 @@ function renderReview(p){
 const examsOf=k=>((window.EXAMS||{})[termOf(k)]||[]).filter(e=>new Date(e.date+'T23:59:59')>=new Date(Date.now()-86400000));
 function examPool(k,e){
   const pool=[];
-  Object.entries(e.scope).forEach(([s,list])=>{ if(!subjectsOf(k).includes(s)) return; bankOf(k,s).forEach(q=>{ if(list.some(x=>(q.l||'').startsWith(x))) pool.push({...q,subj:s}); }); });
+  Object.entries(e.scope).forEach(([s,list])=>{ if(!subjectsOf(k).includes(s)) return; bankOf(k,s).forEach(q=>{ if(list.some(x=>(q.l||'').startsWith(x)) && usable(k,s,q)) pool.push({...q,subj:s}); }); });
   return pool;
 }
 function examHTML(){
@@ -979,18 +1047,20 @@ function examHTML(){
       const qs=bankOf(S,s).filter(q=>list.some(x=>(q.l||'').startsWith(x))), got=qs.filter(q=>S.mastered.includes(qid(s,q))).length;
       return `<li style="--c:${SUBJECTS[s].c}"><span class="pill">${SUBJECTS[s].name}</span><span>範圍：${list.join('、')}</span><em>${have.length===list.length?'':'<span class="lock">'+(have.length?'還缺 '+(list.length-have.length)+' 個':'等待上傳')+'</span> '}${qs.length?`已學會 ${got}/${qs.length}`:''}</em></li>`; }).join('');
     const pool=examPool(S,e);
+    const locked=Object.entries(e.scope).filter(([sb])=>subjectsOf(S).includes(sb)).reduce((t,[sb,list])=>t+bankOf(S,sb).filter(q=>q.ext&&list.some(x=>(q.l||'').startsWith(x))&&!extOpen(S,sb,q.l)).length,0);
     return `<div class="exam"><div class="qhead"><h3>${e.name}・${e.date.slice(5).replace('-','/')}</h3><span class="chip">${days>0?'還有 '+days+' 天':days===0?'就是今天！':'已結束'}</span></div>
       <ul class="examscope">${rows}</ul>
-      <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="btn hot" data-exam="${ei}" ${pool.length?'':'disabled'}>${e.name}模擬考（${Math.min(10,pool.length)} 題，範圍內各科混合）</button></div></div>`;
+      <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="btn hot" data-exam="${ei}" ${pool.length?'':'disabled'}>${e.name}模擬考（${Math.min(10,pool.length)} 題，基本題、延伸題各一半）</button></div>${locked?`<p class="lmeta">還有 ${locked} 題延伸題沒開放：把該課基本題學會 70%，延伸題就會加進模擬考，更接近真正的考試。</p>`:''}</div>`;
   }).join('');
 }
 function startExam(e){
   const pool=examPool(S,e); if(!pool.length){ toast('考試範圍還沒有題目'); return; }
   const key=q=>qid(q.subj,q);
-  const order=list=>{ const missed=shuffle(list.filter(q=>S.missed.includes(key(q)))), fresh=shuffle(list.filter(q=>!S.mastered.includes(key(q))&&!S.missed.includes(key(q)))), done=shuffle(list.filter(q=>S.mastered.includes(key(q)))); return [...missed,...fresh,...done]; };
-  const adv=order(pool.filter(q=>(q.lv||1)>1)), basic=order(pool.filter(q=>(q.lv||1)===1));
-  const nA=Math.min(adv.length,4), nB=Math.min(basic.length,10-nA);
-  const picks=[...shuffle(basic.slice(0,nB)),...shuffle(adv.slice(0,Math.min(adv.length,10-nB)))];
+  const ext=orderBy(pool.filter(q=>q.ext),key), adv=orderBy(pool.filter(q=>!q.ext&&(q.lv||1)>1),key), basic=orderBy(pool.filter(q=>!q.ext&&(q.lv||1)===1),key);
+  // 模擬考：基本題、延伸題各一半；延伸題不夠時，用陷阱／融會貫通題補
+  const nE=Math.min(ext.length,5), nA=Math.min(adv.length,5-nE), nB=Math.min(basic.length,10-nE-nA);
+  const picks=[...shuffle(basic.slice(0,nB)),...shuffle([...ext.slice(0,nE),...adv.slice(0,nA)])];
+  if(picks.length<10){ const more=orderBy(pool.filter(q=>!picks.includes(q)),key); picks.push(...more.slice(0,10-picks.length)); }
   startQuiz(picks[0].subj, picks);
   quiz.exam=e.name; quiz.examObj=e;
 }
