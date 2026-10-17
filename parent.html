@@ -32,6 +32,9 @@
   --i-bg: #1C3245; --i-fg: #8CC4EE; --none: #22302B; --none-fg: #6F837C; color-scheme: dark }
 
 * { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { margin: 0 }
+img { max-width: 100% }
 body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--cover) }
 .wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
