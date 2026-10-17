@@ -1,0 +1,9 @@
+{
+  "name": "小學生練習營",
+  "short_name": "練習營",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F7F0FF",
+  "theme_color": "#F7F0FF",
+  "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]
+}

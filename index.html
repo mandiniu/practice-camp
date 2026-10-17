@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="練習營">
+<meta name="theme-color" content="#F7F0FF">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>小學生練習營</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: camp board — character panel left, activity area right; stacks on tablets in portrait.
+   One idol-stage look shared by every grade. */
+:root{
+  /* 偶像舞台風（所有年級共用）：淡紫底、白卡片、桃粉色重點 */
+  --ground:#F7F0FF; --card:#FFFFFF; --soft:#F6EEFF; --ink:#2E2445; --muted:#6E6290; --line:#E6D8F7;
+  --accent:#E8408E; --accent-ink:#FFFFFF; --accent2:#7B5CFF;
+  --good:#22A06B; --bad:#E5484D; --gold:#C98B0A; --sun:#FFD45C;
+  --stage-a:#EFE4FF; --stage-b:#FFE3F1;
+  --display:"Chiron GoRound TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}}
+h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:.02em}
+h2{color:var(--accent)}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;color:inherit;background:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+
+/* side panel */
+.side{background:var(--card);border-radius:22px;padding:18px;border:2px solid var(--line);position:sticky;top:12px}
+@media (max-width:860px){
+  .side{position:static;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:16px;align-items:start}
+  .brand{grid-column:1/-1}
+  #sideBody{display:contents}
+  #sideBody>.stage{grid-row:span 6}
+  #sideBody>.sub{grid-column:2}
+  .side .who{margin-top:12px}
+}
+@media (max-width:520px){.side{grid-template-columns:130px minmax(0,1fr)}.side .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.side .stat b{font-size:1.1rem}}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:800;font-size:1.25rem;color:var(--accent)}
+.stage{margin-top:12px;background:linear-gradient(var(--stage-a) 0 70%,var(--stage-b) 70%);border-radius:18px;overflow:hidden;display:grid;place-items:center;max-width:100%}
+.stage .av{width:86%}
+.stage.full .av{width:100%}
+.av{display:block;cursor:pointer;transform-origin:50% 92%}
+.av svg{display:block;width:100%;height:auto}
+.idle{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.015,.985)}}
+.bounce{animation:squish .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes squish{0%{transform:scale(1,1)}25%{transform:scale(1.14,.84)}55%{transform:scale(.9,1.12) translateY(-9%)}80%{transform:scale(1.04,.96)}100%{transform:scale(1,1)}}
+.droop{animation:droop .9s ease}
+@keyframes droop{0%{transform:scale(1)}35%{transform:scale(1.12,.8)}70%{transform:scale(1.08,.86)}100%{transform:scale(1)}}
+.who{display:flex;align-items:center;gap:8px;margin-top:12px}
+.who input{font:inherit;font-family:var(--display);font-weight:700;font-size:1.2rem;border:2px dashed transparent;border-radius:10px;padding:2px 6px;width:100%;min-width:0;background:transparent;color:var(--ink)}
+.who input:hover{border-color:var(--line)}
+.chip{flex:none;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;background:color-mix(in srgb,var(--accent) 18%,var(--card));color:var(--accent)}
+.rank{margin-top:10px;background:var(--soft);border-radius:14px;padding:10px 12px}
+.rank b{font-family:var(--display);font-size:1.05rem}
+.rank p{margin:2px 0 6px;font-size:.82rem;color:var(--muted)}
+.meter{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:var(--soft);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:.78rem;color:var(--muted)}
+.stat.coin b{color:var(--gold)}
+.medalrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.mini{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:var(--sun);color:#22313D}
+.mini.off{background:transparent;color:var(--muted);border:2px dashed var(--line)}
+
+/* main */
+.main{min-width:0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:700}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.panel{background:var(--card);border-radius:22px;border:2px solid var(--line);padding:22px}
+.panel h2{font-size:1.5rem}
+.sub{color:var(--muted);margin:4px 0 16px}
+.section-t{font-family:var(--display);font-size:1.05rem;margin:20px 0 10px}
+
+.btn{background:var(--ink);color:var(--card);border-radius:12px;padding:10px 20px;font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.hot{background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+.subjects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:520px){.subjects{grid-template-columns:1fr}}
+.subj{text-align:left;border-radius:18px;padding:16px;display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;background:color-mix(in srgb,var(--c) 16%,var(--card));border:2px solid transparent;transition:transform .15s}
+.subj:hover{transform:translateY(-2px);border-color:var(--c)}
+.glyph{width:56px;height:56px;border-radius:14px;background:var(--c);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.6rem}
+.subj h3{font-size:1.2rem}
+.subj p{margin:0;font-size:.85rem;color:var(--muted)}
+.subj .ver{font-size:.78rem;font-weight:700;color:var(--c);letter-spacing:.04em}
+.bar{height:8px;border-radius:99px;background:color-mix(in srgb,var(--c) 22%,var(--card));margin:6px 0 2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c)}
+
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.85rem;font-weight:700;background:color-mix(in srgb,var(--c,var(--accent)) 18%,var(--card));color:var(--c,var(--accent))}
+.dots{display:flex;gap:6px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dots i.ok{background:var(--good)} .dots i.no{background:var(--bad)} .dots i.now{background:var(--ink)}
+.question{font-family:var(--display);font-size:1.45rem;font-weight:700;margin:18px 0}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:14px;text-align:left;font-size:1.1rem;font-weight:500;color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt:disabled{cursor:default}
+.opt.right{background:color-mix(in srgb,var(--good) 20%,var(--card));border-color:var(--good)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.feedback{margin-top:16px;border-radius:16px;padding:16px;display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start}
+.feedback.good{background:color-mix(in srgb,var(--good) 16%,var(--card))}
+.feedback.bad{background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.feedback h3{font-size:1.15rem}
+.feedback p{margin:4px 0 0}
+.why{background:var(--card);border-radius:10px;padding:10px 12px;margin-top:8px}
+.why b{color:var(--accent)}
+.note{font-size:.82rem;color:var(--muted)}
+@media (max-width:520px){.feedback{grid-template-columns:1fr}.feedback .av{width:64px}}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.item{background:var(--soft);border:2px solid var(--line);border-radius:16px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.item.on{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--card))}
+.item .av{width:100%;max-width:130px;cursor:default}
+.item h4{font-size:1rem}
+.item small{color:var(--muted);font-size:.78rem;line-height:1.4;min-height:2.2em}
+.item .btn{width:100%;padding:8px 10px;font-size:.92rem}
+.lock{font-size:.78rem;color:var(--bad);font-weight:700}
+.slotname{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+
+/* designer */
+.designer{display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:20px;align-items:start}
+@media (max-width:640px){.designer{grid-template-columns:1fr}.designer .stage{max-width:260px;margin-inline:auto}}
+.optrow{margin-bottom:14px}
+.optrow h4{font-size:.95rem;margin-bottom:8px;color:var(--muted)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:40px;height:40px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--line)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
+.choice{background:var(--soft);border:2px solid var(--line);border-radius:12px;padding:7px 14px;font-weight:700}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--card))}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.pcard{background:var(--soft);border:3px solid transparent;border-radius:18px;padding:10px;text-align:center;font-family:var(--display);font-weight:700}
+.pcard .av{cursor:pointer}
+.pcard small{display:block;font-family:var(--body);font-weight:500;color:var(--muted);font-size:.8rem}
+.pcard[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.pcard.locked{opacity:.55}
+
+.kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.kid{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;text-align:left;background:var(--soft);border:2px solid var(--line);border-radius:18px;padding:10px}
+.kid:hover{border-color:var(--accent)}
+.kid b{display:block;font-family:var(--display);font-size:1.15rem}
+.kid small{color:var(--muted);font-size:.82rem}
+.kid .stage{margin:0}
+.addkid{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.addkid input{font:inherit;border:2px solid var(--line);border-radius:12px;padding:9px 12px;flex:1 1 180px;min-width:0;background:var(--card);color:var(--ink)}
+.seg{display:flex;background:var(--soft);border-radius:12px;padding:3px;gap:3px}
+.segb{border-radius:10px;padding:7px 14px;font-weight:700;color:var(--muted)}
+.segb[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0002}
+
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.medal{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;background:var(--soft);border-radius:16px;padding:12px;border:2px solid var(--line)}
+.medal .m{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.1rem;background:var(--sun);color:#22313D}
+.medal.off .m{background:transparent;border:2px dashed var(--line);color:var(--muted)}
+.medal p{margin:0;font-size:.82rem;color:var(--muted)}
+.revgroup{background:color-mix(in srgb,var(--c) 14%,var(--card));border-radius:16px;padding:14px;margin-top:12px}
+.revgroup ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.revgroup li{background:var(--card);border-radius:10px;padding:8px 10px}
+.empty{text-align:center;color:var(--muted)}
+.empty .av{width:120px;margin:0 auto}
+.result{text-align:center}
+.result .av{width:150px;margin:0 auto}
+.result .big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--good)}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.lesson{text-align:left;border-radius:16px;padding:14px;background:var(--soft);border:2px solid var(--line);display:grid;gap:4px}
+.lesson:hover{border-color:var(--c)}
+.lesson .pill{justify-self:start}
+.lesson b{font-family:var(--display);font-size:1.15rem}
+.lmeta{font-size:.82rem;color:var(--muted)}
+.qtags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lvtag{border-radius:999px;padding:3px 12px;font-size:.85rem;font-weight:800;color:#fff}
+.lvtag.lv2{background:#E5484D}
+.lvtag.lv3{background:linear-gradient(90deg,#8E6CFF,#3E8FD6)}
+.reqs{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:3px;font-size:.85rem}
+.reqs li{display:grid;grid-template-columns:18px 1fr auto;gap:4px;color:var(--muted)}
+.reqs li.ok{color:var(--good)}
+.reqs em{font-style:normal;font-variant-numeric:tabular-nums}
+.season{display:inline-block;border-radius:999px;padding:1px 10px;font-size:.75rem;font-weight:700;background:#F28C28;color:#fff;margin-left:6px;vertical-align:middle}
+.item .season{margin:0}
+.season.off{background:var(--line);color:var(--muted)}
+.qcount{font-size:.85rem;color:var(--muted);font-weight:700}
+.subj.empty-subj{opacity:.6;cursor:default}
+.subj.empty-subj:hover{transform:none;border-color:transparent}
+.levels{display:grid;gap:6px}
+.lvrow{display:grid;grid-template-columns:minmax(90px,auto) 1fr;gap:12px;background:var(--soft);border-radius:12px;padding:8px 12px;font-size:.9rem;color:var(--muted)}
+.lvrow b{font-family:var(--display);color:var(--ink)}
+.lvrow.done{background:color-mix(in srgb,var(--good) 14%,var(--card))}
+.kidname{font-family:var(--display);font-size:1.25rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button.chip{cursor:pointer;border:none}
+.field{font:inherit;width:100%;border:2px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--card);color:var(--ink)}
+.cloud{font-size:.8rem;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--soft);color:var(--muted)}
+.cloud[data-state="ok"]{background:color-mix(in srgb,var(--good) 16%,var(--card));color:var(--good)}
+.cloud[data-state="error"]{background:color-mix(in srgb,var(--bad) 14%,var(--card));color:var(--bad)}
+.furchip{display:inline-flex;align-items:center;gap:6px}
+.furchip i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);display:inline-block}
+.season.reward{background:var(--accent2)}
+.medal .rw{color:var(--accent);font-weight:700;margin-top:2px}
+.choice:disabled{opacity:.5;cursor:not-allowed}
+#addKid{display:grid;gap:4px}
+#addKid .btn{justify-self:start}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:999px;font-weight:700;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M15 3 L28 26 H2 Z" fill="currentColor"/><path d="M15 3 L19 26 H11 Z" fill="#22313D" opacity=".85"/></svg>
+      小學生練習營
+    </div>
+    <div id="sideBody"></div>
+  </aside>
+  <main class="main">
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+    <section class="panel" id="panel"></section>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+
+/* ================= 角色繪圖：可愛動物（細描邊、同色系線條、圓亮眼睛） ================= */
+let _uid=0; const uid=()=> 'g'+(++_uid);
+const OL='#5B4A42';
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+  const t=amt<0?0:255, p=Math.abs(amt);
+  r=Math.round((t-r)*p+r); g=Math.round((t-g)*p+g); b=Math.round((t-b)*p+b);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+const lineOf=c=>{ const n=parseInt(c.slice(1),16); const lum=((n>>16)*.3+(n>>8&255)*.59+(n&255)*.11); return lum>235?'#B9ADA4':shade(c,-.38); };
+const ol=(c=OL,w=2.6)=>`stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const mirror = s=>`${s}<g transform="translate(200 0) scale(-1 1)">${s}</g>`;
+const lin=(id,a,b)=>`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+const star=(x,y,r,fill,stroke='')=>{ let d=''; for(let i=0;i<10;i++){const a=Math.PI/5*i-Math.PI/2, rr=i%2?r*.45:r; d+=(i?'L':'M')+(x+rr*Math.cos(a)).toFixed(1)+' '+(y+rr*Math.sin(a)).toFixed(1);} return `<path d="${d}Z" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round"`:''}/>`; };
+const heart=(x,y,s,fill,stroke='')=>`<path d="M${x} ${y+s*.9} C${x-s*1.4} ${y} ${x-s*.7} ${y-s*1.1} ${x} ${y-s*.3} C${x+s*.7} ${y-s*1.1} ${x+s*1.4} ${y} ${x} ${y+s*.9}Z" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width="1.8"`:''}/>`;
+const SVG=(inner,bg)=>`<svg viewBox="${bg?'-10 0 220 230':'-14 -12 228 238'}" role="img" aria-hidden="true">${inner}</svg>`;
+const at=(dx,dy,s)=>`<g transform="translate(${dx} ${dy})">${s}</g>`;
+const outlined=s=>`<g ${ol(OL,2.2)}>${s}</g>`;
+const thick=(d,color,w,line=OL)=>`<path d="${d}" stroke="${line}" stroke-width="${w+4.4}" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+/* ---------- 動物 ---------- */
+// furs: [名稱, 主色, 淺色(肚子/口鼻)]
+// furs: [名稱, 主色, 淺色(肚子/口鼻), 特徵]
+const ANIMALS={
+  cat:{name:'貓咪', furs:{
+    orange:['橘貓','#F7B26E','#FFF4E6',{marks:'tabby',mark:'#E08A44'}],
+    american:['美國短毛貓','#C9CDD6','#F7F7FA',{marks:'tabby',mark:'#6E7380'}],
+    siamese:['暹羅貓','#F6E9D6','#FFFAF2',{marks:'points',mark:'#7A5B4A',eye:'#6FB6F0'}],
+    ragdoll:['布偶貓','#FFFFFF','#FFFFFF',{marks:'points',mark:'#B8A79A',eye:'#6FB6F0',ruff:true}],
+    british:['英國短毛貓','#A9B3C6','#E9EDF5',{chubby:true,eye:'#E8A24A'}],
+    calico:['三花貓','#FFFFFF','#FFFFFF',{marks:'calico'}],
+    tuxedo:['賓士貓','#4F4A57','#FFFFFF',{marks:'tuxedo',eye:'#9FD66B'}],
+    black:['黑貓','#4F4A57','#EDE9F0',{eye:'#E8B84A'}],
+    white:['白貓','#FFFFFF','#FFF4F6',{}],
+  }},
+  dog:{name:'小狗', furs:{
+    shiba:['柴犬','#EBA45E','#FFF6E8',{ear:'up',marks:'shiba',tail:'curl'}],
+    corgi:['柯基','#F0A35C','#FFFFFF',{ear:'big',marks:'corgi',tail:'none'}],
+    poodle:['貴賓狗','#C9905E','#F2DCC6',{ear:'poodle',tail:'pom'}],
+    golden:['黃金獵犬','#F2C477','#FFF4DF',{ear:'flop'}],
+    husky:['哈士奇','#8F98A8','#FFFFFF',{ear:'up',marks:'husky',eye:'#6FB6F0',tail:'curl'}],
+    pom:['博美狗','#F6B46A','#FFF2DE',{ear:'small',ruff:true,tail:'curl'}],
+    dachshund:['臘腸狗','#A3633E','#E9C5A2',{ear:'long'}],
+    dalmatian:['大麥町','#FFFFFF','#FFFFFF',{ear:'flop',marks:'spots',earColor:'#4F4A57'}],
+    frenchie:['法國鬥牛犬','#E9D2B4','#FFF7EC',{ear:'bat',marks:'frenchie',tail:'none'}],
+    maltese:['馬爾濟斯','#FFFFFF','#FFFFFF',{ear:'long',earColor:'#F4EEE8'}],
+  }},
+  bear:{name:'小熊', furs:{brown:['棕熊','#B07D55','#F4E0C8'],honey:['蜂蜜熊','#E8B46B','#FFF1D9'],polar:['北極熊','#FFFFFF','#F6F1EA'],black:['黑熊','#5A5462','#E9DDCF'],pink:['草莓熊','#F7B7C8','#FFEFF3']}},
+  fox:{name:'狐狸', furs:{orange:['紅狐','#F39A52','#FFFFFF'],snow:['雪狐','#FFFFFF','#FFFFFF'],silver:['銀狐','#AEB3BF','#FFFFFF'],red:['火狐','#E06C45','#FFF4EC']}},
+  rabbit:{name:'兔兔', hidden:true, furs:{white:['白兔','#FFFFFF','#FFF4F7'],pink:['粉兔','#FFD3E0','#FFF6F9'],gray:['灰兔','#C7C3CE','#F7F6FA'],brown:['棕兔','#C99B76','#F7EADC']}},
+  unicorn:{name:'獨角獸', hidden:true, furs:{white:['雪白','#FFFFFF','#FFF8FB'],pink:['粉紅','#FFDCEA','#FFF8FB'],lilac:['薰衣草','#E4D9FB','#FBF8FF']}},
+  dragon:{name:'小龍', hidden:true, furs:{green:['綠龍','#9FDDAA','#F2F9DC'],purple:['紫龍','#C3AEF2','#F6F0FF'],blue:['藍龍','#9EC9F5','#EEF7FF'],red:['紅龍','#F59A8C','#FFF1DC']}},
+};
+const EYE='#2E2630';
+function eyes(y,iris,ring){
+  const r=ring?`<ellipse cx="80" cy="${y}" rx="8.4" ry="9.4" fill="#FFFFFF"/>`:'';
+  const i=iris?`<ellipse cx="80" cy="${y+1.2}" rx="5" ry="5.6" fill="${iris}"/><ellipse cx="80" cy="${y+1.2}" rx="2.6" ry="3.4" fill="${EYE}"/>`:'';
+  return mirror(`${r}<ellipse cx="80" cy="${y}" rx="6.6" ry="7.6" fill="${EYE}"/>${i}<circle cx="82.4" cy="${y-2.8}" r="2.6" fill="#FFFFFF"/><circle cx="78.6" cy="${y+3}" r="1.2" fill="#FFFFFF"/>`);
+}
+const blush=y=>mirror(`<ellipse cx="64" cy="${y}" rx="9" ry="5.2" fill="#FFAFC2" opacity=".75"/>`);
+const smallMouth=(y,o)=>`<path d="M100 ${y} Q96 ${y+5} 92 ${y+2} M100 ${y} Q104 ${y+5} 108 ${y+2}" stroke="${o}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+const dogMouth=o=>`<path d="M100 117 L100 121 Q95 126 91 122 M100 121 Q105 126 109 122" stroke="${o}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+function speciesParts(sp,c,L,o,x={}){
+  const p={tail:'',ears:'',face:'',front:'',headMarks:'',arms:true,feet:c,belly:true,armFill:c,eye:x.eye,ring:false,headRx:58,ruff:''};
+  const dark=lineOf(c)!=='#B9ADA4' && parseInt(c.slice(1,3),16)<0x70;
+  if(dark && !x.eye) p.ring=true;
+  if(sp==='cat'){
+    const earC = x.marks==='points'?x.mark:c;
+    const es = x.chubby?.8:1;
+    p.ears=mirror(`<g transform="translate(${56*(1-es)} ${70*(1-es)}) scale(${es})"><path d="M50 80 L56 32 L90 58Z" fill="${earC}" ${ol(o)}/><path d="M58 70 L61 44 L80 59Z" fill="#FFC2D1"/></g>`);
+    if(x.marks==='calico') p.ears=`<path d="M50 80 L56 32 L90 58Z" fill="#F2A65E" ${ol(o)}/><path d="M58 70 L61 44 L80 59Z" fill="#FFC2D1"/>`+`<g transform="translate(200 0) scale(-1 1)"><path d="M50 80 L56 32 L90 58Z" fill="#4F4A57" ${ol(o)}/><path d="M58 70 L61 44 L80 59Z" fill="#FFC2D1"/></g>`;
+    const tailC = x.marks==='points'?x.mark:c;
+    p.tail=thick('M130 190 Q172 190 164 148',tailC,x.ruff?13:9,o);
+    if(x.chubby) p.headRx=64;
+    if(x.marks==='tabby') p.headMarks=`<path d="M92 56 L94 68 M100 54 L100 68 M108 56 L106 68" stroke="${x.mark}" stroke-width="3.6" stroke-linecap="round"/>`+mirror(`<path d="M46 100 L58 102 M46 108 L57 108" stroke="${x.mark}" stroke-width="3" stroke-linecap="round"/>`);
+    if(x.marks==='calico') p.headMarks=`<ellipse cx="70" cy="70" rx="26" ry="20" fill="#F2A65E"/><ellipse cx="132" cy="66" rx="22" ry="16" fill="#4F4A57"/>`;
+    if(x.marks==='points') { p.headMarks=`<ellipse cx="100" cy="116" rx="24" ry="20" fill="${x.mark}" opacity=".55"/>`; p.armFill=x.mark; p.feet=x.mark; }
+    if(x.marks==='tuxedo') p.headMarks=`<path d="M100 92 C92 104 74 108 70 124 C80 140 120 140 130 124 C126 108 108 104 100 92Z" fill="#FFFFFF"/>`;
+    if(x.ruff) p.ruff=`<path d="M64 140 L70 152 L78 144 L86 156 L94 146 L100 158 L106 146 L114 156 L122 144 L130 152 L136 140Z" fill="#FFFFFF" ${ol(o,2)}/>`;
+    p.face=`<path d="M96 113 L104 113 L100 118Z" fill="#F49AB0"/>`+smallMouth(118,o)+mirror(`<path d="M54 113 L38 110 M54 119 L38 121" stroke="${o}" stroke-width="1.6" stroke-linecap="round"/>`);
+  }
+  if(sp==='dog'){
+    const ear = x.earColor || (c==='#FFFFFF'?'#EED2AE':shade(c,-.15));
+    if(x.ear==='flop') p.ears=mirror(`<path d="M52 64 C32 68 26 104 38 124 C50 120 58 98 64 76Z" fill="${ear}" ${ol(o)}/>`);
+    if(x.ear==='long') p.ears=mirror(`<path d="M54 62 C30 66 22 120 34 146 C50 144 58 100 64 74Z" fill="${ear}" ${ol(o)}/>`);
+    if(x.ear==='up') p.ears=mirror(`<path d="M52 80 Q54 44 62 32 Q78 42 90 58Z" fill="${c}" ${ol(o)}/><path d="M60 68 Q61 50 65 44 Q74 50 80 59Z" fill="${x.marks==='husky'?'#FFFFFF':'#FFE2CC'}"/>`);
+    if(x.ear==='big') p.ears=mirror(`<path d="M50 82 Q44 34 58 22 Q80 34 92 58Z" fill="${c}" ${ol(o)}/><path d="M58 70 Q55 42 61 34 Q74 44 81 58Z" fill="#FFE2CC"/>`);
+    if(x.ear==='small') p.ears=mirror(`<path d="M60 66 L66 44 L84 56Z" fill="${c}" ${ol(o)}/>`);
+    if(x.ear==='bat') p.ears=mirror(`<path d="M50 82 C34 44 50 22 70 30 L90 58Z" fill="${c}" ${ol(o)}/><path d="M56 72 C46 48 56 34 68 38 L82 58Z" fill="#FFD3D9"/>`);
+    if(x.ear==='poodle') p.ears=mirror([[48,86],[42,104],[50,120],[40,122]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="13" fill="${shade(c,-.05)}" ${ol(o)}/>`).join(''));
+    p.tail = x.tail==='none'?'' : x.tail==='curl'? `<path d="M128 182 C152 170 156 150 140 148 C130 148 132 162 142 160" fill="none" stroke="${o}" stroke-width="13" stroke-linecap="round"/><path d="M128 182 C152 170 156 150 140 148 C130 148 132 162 142 160" fill="none" stroke="${c}" stroke-width="8.6" stroke-linecap="round"/>` : x.tail==='pom'? thick('M130 186 Q146 176 148 166',c,5,o)+`<circle cx="150" cy="160" r="10" fill="${shade(c,-.05)}" ${ol(o)}/>` : thick('M132 188 Q154 180 152 162',c,8,o);
+    let muzzle=`<ellipse cx="100" cy="120" rx="22" ry="15" fill="${L}" ${ol(o,1.6)}/>`;
+    if(x.marks==='shiba') { p.headMarks=`<path d="M44 106 C58 116 78 114 100 122 C122 114 142 116 156 106 C152 132 128 146 100 146 C72 146 48 132 44 106Z" fill="${L}"/>`+mirror(`<ellipse cx="82" cy="88" rx="5" ry="3.4" fill="${L}"/>`); muzzle=''; }
+    if(x.marks==='corgi') { p.headMarks=`<path d="M94 50 Q100 48 106 50 L110 100 Q100 106 90 100Z" fill="#FFFFFF"/><path d="M60 112 C70 126 84 118 100 108 C116 118 130 126 140 112 C140 136 122 148 100 148 C78 148 60 136 60 112Z" fill="#FFFFFF"/>`; muzzle=''; p.belly=true; }
+    if(x.marks==='husky') { p.headMarks=`<path d="M100 66 C94 74 92 84 88 92 C80 88 64 86 54 96 C50 120 70 146 100 146 C130 146 150 120 146 96 C136 86 120 88 112 92 C108 84 106 74 100 66Z" fill="#FFFFFF"/>`; muzzle=''; }
+    if(x.marks==='spots') { p.headMarks=[[72,70,7],[128,76,6],[60,98,5],[140,104,6],[112,60,4]].map(([a,b,r])=>`<circle cx="${a}" cy="${b}" r="${r}" fill="#4F4A57"/>`).join(''); p.bodySpots=true; }
+    if(x.marks==='frenchie') { muzzle=`<ellipse cx="100" cy="120" rx="24" ry="15" fill="#8C735E"/>`; }
+    if(x.ear==='poodle') p.headMarks+=[[78,54],[92,46],[108,46],[122,54],[100,58]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="13" fill="${shade(c,-.05)}" ${ol(o)}/>`).join('');
+    if(x.ruff) p.ruff=`<circle cx="100" cy="110" r="66" fill="${shade(c,.1)}" ${ol(o)}/>`+Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2;return `<circle cx="${(100+64*Math.cos(a)).toFixed(1)}" cy="${(110+64*Math.sin(a)).toFixed(1)}" r="9" fill="${shade(c,.1)}"/>`;}).join('');
+    p.face=muzzle+`<ellipse cx="100" cy="112" rx="7" ry="5" fill="${EYE}"/>`+dogMouth(o)+(x.marks==='frenchie'?'':`<ellipse cx="100" cy="127" rx="3.6" ry="3.4" fill="#F49AB0"/>`);
+  }
+  if(sp==='bear'){
+    p.ears=mirror(`<circle cx="56" cy="58" r="17" fill="${c}" ${ol(o)}/><circle cx="56" cy="58" r="9" fill="${L}"/>`);
+    p.tail=`<circle cx="132" cy="194" r="7" fill="${c}" ${ol(o)}/>`;
+    p.face=`<ellipse cx="100" cy="120" rx="20" ry="14" fill="${L}" ${ol(o,1.6)}/><ellipse cx="100" cy="113" rx="7" ry="5" fill="${EYE}"/>`+dogMouth(o);
+  }
+  if(sp==='fox'){
+    p.ears=mirror(`<path d="M48 82 L52 24 L92 56Z" fill="${c}" ${ol(o)}/><path d="M56 70 L58 40 L80 57Z" fill="${c==='#FFFFFF'?'#FFD7E2':'#FFFFFF'}"/><path d="M52 24 L51 38 L62 33Z" fill="${c==='#FFFFFF'?'#C9C2BC':'#5A4A45'}"/>`);
+    p.tail=`<path d="M128 192 C172 200 196 160 180 124 C172 146 152 164 128 176Z" fill="${c}" ${ol(o)}/><path d="M180 124 C186 140 182 154 172 162 C170 150 172 136 180 124Z" fill="#FFFFFF" ${ol(o,1.6)}/>`;
+    p.headMarks=`<path d="M44 106 C58 116 78 114 100 124 C122 114 142 116 156 106 C152 132 128 146 100 146 C72 146 48 132 44 106Z" fill="${L}"/>`;
+    p.face=`<ellipse cx="100" cy="117" rx="5.5" ry="4" fill="${EYE}"/>`+smallMouth(121,o);
+  }
+  if(sp==='rabbit'){
+    p.ears=mirror(`<ellipse cx="80" cy="30" rx="13" ry="34" fill="${c}" ${ol(o)} transform="rotate(-8 80 60)"/><ellipse cx="80" cy="32" rx="6" ry="24" fill="#FFC2D1" transform="rotate(-8 80 60)"/>`);
+    p.tail=`<circle cx="134" cy="194" r="10" fill="#FFFFFF" ${ol(o)}/>`;
+    p.face=`<path d="M96 113 L104 113 L100 117Z" fill="#F49AB0"/><path d="M100 117 L100 121 M100 121 Q96 125 92 122 M100 121 Q104 125 108 122" stroke="${o}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  }
+  if(sp==='unicorn'){
+    const mane=['#FFB3C8','#FFE08A','#A9DDFB','#C9B4FF'];
+    p.ears=mirror(`<path d="M58 72 L62 44 L82 62Z" fill="${c}" ${ol(o)}/><path d="M63 66 L65 52 L76 62Z" fill="#FFC2D1"/>`);
+    p.tail=mane.map((m,i)=>thick(`M128 ${186+i*3} Q${168+i*4} ${190+i*4} ${170+i*6} ${150+i*10}`,m,6,o)).join('');
+    p.top=mane.map((m,i)=>`<ellipse cx="${58+i*4}" cy="${58+i*9}" rx="12" ry="8" fill="${m}" ${ol(o,1.8)}/>`).join('')+`<ellipse cx="96" cy="58" rx="14" ry="8" fill="${mane[0]}" ${ol(o,1.8)}/><ellipse cx="116" cy="60" rx="12" ry="7" fill="${mane[3]}" ${ol(o,1.8)}/>`+`<path d="M92 56 L102 10 L110 56Z" fill="#FFE08A" ${ol(o)}/><path d="M95 44 L108 40 M97 32 L106 29" stroke="${o}" stroke-width="1.6"/>`;
+    p.face=`<ellipse cx="100" cy="120" rx="18" ry="12" fill="${L}"/><circle cx="94" cy="118" r="1.6" fill="${o}"/><circle cx="106" cy="118" r="1.6" fill="${o}"/>`+smallMouth(124,o);
+  }
+  if(sp==='dragon'){
+    const d=shade(c,-.18);
+    p.ears=mirror(thick('M72 58 Q64 40 70 26',d,6,o)+`<path d="M50 96 L28 82 L40 104Z" fill="${c}" ${ol(o)}/>`)+`<path d="M78 60 L84 40 L92 52 L100 30 L108 52 L116 40 L122 60Z" fill="${d}" ${ol(o)}/>`;
+    p.tail=`<path d="M130 190 Q176 200 184 160 L196 154 L186 172 L176 168 Q170 196 128 202Z" fill="${c}" ${ol(o)}/>`;
+    p.face=`<circle cx="95" cy="116" r="1.6" fill="${o}"/><circle cx="105" cy="116" r="1.6" fill="${o}"/>`+smallMouth(121,o);
+  }
+  return p;
+}
+
+/* ---------- 翅膀 ---------- */
+const WINGS={
+  none:   {name:'不要翅膀', d:()=>''},
+  angel:  {name:'小天使', d:()=>mirror(`<path d="M66 150 C36 118 12 136 12 158 C22 154 24 166 34 164 C26 178 40 184 50 174 C48 186 60 188 68 176Z" fill="#FFFFFF" ${ol('#C9C2D6')}/>`)},
+  butterfly:{name:'蝴蝶', d:()=>mirror(`<path d="M80 152 C50 112 14 120 22 150 C28 168 56 164 80 158Z" fill="#FFC2DD" ${ol('#D98AB0')}/><path d="M80 162 C56 168 36 186 50 200 C64 208 76 188 82 168Z" fill="#D6C2FF" ${ol('#A98AD9')}/><circle cx="44" cy="146" r="6" fill="#FFFFFF" opacity=".8"/>`)},
+  bat:    {name:'小惡魔', d:()=>mirror(`<path d="M68 150 C36 112 14 146 10 170 C26 160 32 174 44 170 C36 186 50 192 64 176Z" fill="#9C86CF" ${ol('#6E5AA6')}/>`)},
+  fairy:  {name:'小精靈', d:()=>mirror(`<ellipse cx="50" cy="140" rx="34" ry="16" fill="#CFF0FF" opacity=".8" ${ol('#8CC8E8')} transform="rotate(-30 50 140)"/><ellipse cx="56" cy="176" rx="24" ry="11" fill="#E4F7FF" opacity=".8" ${ol('#8CC8E8')} transform="rotate(20 56 176)"/>`)},
+  rainbow:{name:'彩虹翅膀', special:true, d:()=>mirror(['#FF9EB5','#FFCB7A','#FFF08A','#A8E6A0','#9FD3FF','#C9B4FF'].map((col,i)=>`<path d="M72 160 C${48-i*4} ${120-i*6} ${10-i*3} ${130-i*4} ${8-i*2} ${160+i*2} C${30} ${158} ${50} ${166} 72 166Z" fill="${col}"/>`).reverse().join('')+`<path d="M72 160 C24 96 -16 118 -6 172 C30 158 50 166 72 166Z" fill="none" ${ol('#B98AA6')}/>`)},
+  star:   {name:'星空翅膀', special:true, d:()=>mirror(`<path d="M68 150 C34 100 0 126 4 168 C20 160 28 176 42 170 C36 188 54 192 66 176Z" fill="#4B4F8F" ${ol('#2F3266')}/>`+star(30,138,6,'#FFE08A')+star(46,160,4,'#FFFFFF')+star(22,160,3,'#FFFFFF')+star(52,140,3,'#FFE08A'))},
+  phoenix:{name:'鳳凰翅膀', special:true, d:()=>mirror(`<path d="M70 154 C40 96 -8 96 -6 140 C6 132 10 146 20 142 C8 158 18 170 30 164 C22 182 40 190 52 176 C52 190 66 190 72 172Z" fill="#FFA45C" ${ol('#D9603B')}/><path d="M66 156 C44 120 14 116 10 138 C24 136 30 150 44 150 C40 164 54 170 62 162Z" fill="#FFE08A"/>`)},
+};
+
+/* ---------- 裝扮（以「頭頂 y≈46、眼睛 y≈118、脖子 y≈152」的舊座標畫，用 ANCHOR 對位） ---------- */
+const PUMPKIN=(x,y,r,face)=>`<ellipse cx="${x}" cy="${y}" rx="${r*1.15}" ry="${r}" fill="#F7A55A" ${ol(OL,2.2)}/><path d="M${x-2} ${y-r} q2 -${r*.5} 6 -${r*.6}" stroke="#6BA35A" stroke-width="4" fill="none" stroke-linecap="round"/>${face?`<path d="M${x-r*.5} ${y-r*.15} l${r*.2} -${r*.25} l${r*.2} ${r*.25}Z M${x+r*.1} ${y-r*.15} l${r*.2} -${r*.25} l${r*.2} ${r*.25}Z" fill="${OL}"/><path d="M${x-r*.5} ${y+r*.25} Q${x} ${y+r*.6} ${x+r*.5} ${y+r*.25}" stroke="${OL}" stroke-width="2" fill="none"/>`:''}`;
+const GEAR = {
+  // 頭上
+  hat:     {slot:'head', d:()=>outlined(`<path d="M60 62 Q62 28 100 26 Q138 28 140 62Z" fill="#E8C994"/><ellipse cx="100" cy="64" rx="60" ry="10" fill="#DDB77E"/>`)+`<path d="M62 54 Q100 47 138 54" stroke="#A87A4A" stroke-width="6"/>`},
+  starclip:{slot:'head', d:()=>star(136,72,9,'#FFE08A',OL)+star(148,86,5,'#FFE08A',OL)},
+  flowers: {slot:'head', d:()=>`<path d="M46 74 Q100 38 154 74" stroke="#7DB86A" stroke-width="5" fill="none"/>${[[50,72,'#FFB3C8'],[72,56,'#FFE08A'],[100,50,'#FFFFFF'],[128,56,'#D4C2FF'],[150,72,'#FFB3C8']].map(([x,y,c])=>`<g transform="translate(${x} ${y})" ${ol(OL,1.8)}>${[0,72,144,216,288].map(r=>`<ellipse cx="0" cy="-7" rx="5" ry="7" fill="${c}" transform="rotate(${r})"/>`).join('')}<circle r="4" fill="#F7A55A"/></g>`).join('')}`},
+  headset: {slot:'head', d:()=>thick('M40 124 C34 36 166 36 160 124','#6A5D78',3)+outlined(`<rect x="30" y="110" width="14" height="24" rx="6" fill="#6A5D78"/><rect x="156" y="110" width="14" height="24" rx="6" fill="#6A5D78"/>`)+`<path d="M38 132 Q48 148 84 142" stroke="${OL}" stroke-width="3" fill="none"/><circle cx="86" cy="142" r="4" fill="${OL}"/>`},
+  crown:   {slot:'head', d:()=>outlined(`<path d="M66 64 L70 30 L86 48 L100 22 L114 48 L130 30 L134 64Z" fill="#FFE08A"/><circle cx="100" cy="50" r="5" fill="#FF8FA8"/><circle cx="80" cy="56" r="3.5" fill="#9FD3FF"/><circle cx="120" cy="56" r="3.5" fill="#A8E3B8"/>`)},
+  tiara:   {slot:'head', d:()=>outlined(`<path d="M68 66 L74 46 L86 58 L100 36 L114 58 L126 46 L132 66 Q100 58 68 66Z" fill="#FFE08A"/><circle cx="100" cy="54" r="4.5" fill="#FF9EC4"/>`)},
+  witch:   {slot:'head', d:()=>outlined(`<path d="M70 60 L98 -2 Q112 -8 122 8 Q112 6 108 14 L130 60Z" fill="#8F7BC4"/><rect x="68" y="48" width="64" height="10" fill="#F7A55A"/><ellipse cx="100" cy="62" rx="60" ry="10" fill="#7A66B0"/>`)+star(116,34,6,'#FFE08A',OL)},
+  pumpkinhat:{slot:'head', d:()=>outlined(`<ellipse cx="100" cy="54" rx="52" ry="24" fill="#F7A55A"/><path d="M110 16 q14 -6 18 4 q-10 2 -18 -4Z" fill="#9ED68C"/>`)+`<path d="M100 32 Q88 54 100 76 M100 32 Q112 54 100 76" stroke="${OL}" stroke-width="1.6" fill="none" opacity=".5"/>`+thick('M98 32 q0 -12 10 -16','#6BA35A',4)},
+  santa:   {slot:'head', d:()=>outlined(`<path d="M60 62 Q64 22 104 20 Q140 22 158 54 L146 60Z" fill="#F07A7A"/><rect x="54" y="54" width="92" height="15" rx="7.5" fill="#FFFFFF"/><circle cx="156" cy="58" r="9" fill="#FFFFFF"/>`)},
+  antlers: {slot:'head', d:()=>mirror(thick('M80 62 C72 42 66 28 60 14 M68 34 L52 26 M64 22 L72 8','#C79A6B',5))},
+  fuclip:  {slot:'head', d:()=>outlined(`<rect x="130" y="62" width="20" height="20" rx="3" fill="#F07A7A" transform="rotate(45 140 72)"/><circle cx="140" cy="72" r="4.5" fill="#FFE08A"/>`)},
+  detective:{slot:'head', reward:true, d:()=>outlined(`<path d="M58 62 Q60 30 100 28 Q140 30 142 62Z" fill="#C8A47A"/><path d="M52 64 Q100 52 148 64 L144 72 Q100 62 56 72Z" fill="#B08A60"/>`)+`<path d="M60 52 Q100 44 140 52" stroke="#7A5A3C" stroke-width="6"/>`+[70,90,110,130].map(x=>`<path d="M${x} 34 L${x-6} 60" stroke="#B08A60" stroke-width="2"/>`).join('')},
+  gradcap: {slot:'head', reward:true, d:()=>outlined(`<path d="M66 60 Q66 44 100 42 Q134 44 134 60Z" fill="#4E5566"/><path d="M100 18 L156 38 L100 58 L44 38Z" fill="#5E6678"/>`)+`<path d="M150 40 L150 62" stroke="#FFE08A" stroke-width="3"/><circle cx="150" cy="66" r="5" fill="#FFE08A" ${ol(OL,1.6)}/>`},
+  // 臉上
+  shades:  {slot:'face', d:()=>outlined(`<rect x="62" y="108" width="34" height="22" rx="9" fill="#4E4658"/><rect x="104" y="108" width="34" height="22" rx="9" fill="#4E4658"/>`)+`<path d="M96 116 Q100 112 104 116" stroke="${OL}" stroke-width="3" fill="none"/><path d="M68 114 L78 114 M110 114 L120 114" stroke="#FFB3D4" stroke-width="2.6" stroke-linecap="round"/>`},
+  goggles: {slot:'face', d:()=>thick('M36 98 Q100 84 164 98','#B88A5A',4)+outlined(`<circle cx="80" cy="91" r="14" fill="#CFF0FF"/><circle cx="120" cy="91" r="14" fill="#CFF0FF"/>`)},
+  starglass:{slot:'face', d:()=>star(81,118,17,'#FFC2DD',OL)+star(119,118,17,'#FFC2DD',OL)+`<path d="M96 116 Q100 112 104 116" stroke="${OL}" stroke-width="2.4" fill="none"/>`},
+  roundglass:{slot:'face', reward:true, d:()=>`<circle cx="80" cy="118" r="13" fill="#FFFFFF" fill-opacity=".25" ${ol(OL,3)}/><circle cx="120" cy="118" r="13" fill="#FFFFFF" fill-opacity=".25" ${ol(OL,3)}/><path d="M93 116 Q100 111 107 116" stroke="${OL}" stroke-width="3" fill="none"/>`},
+  // 脖子
+  scarf:   {slot:'neck', d:()=>outlined(`<path d="M62 150 Q100 166 138 150 L137 160 Q118 168 100 188 Q82 168 63 160Z" fill="#F48A8A"/>`)+`<circle cx="86" cy="164" r="2.4" fill="#FFFFFF"/><circle cx="114" cy="164" r="2.4" fill="#FFFFFF"/>`},
+  bowtie:  {slot:'neck', d:()=>outlined(`<path d="M100 158 L78 146 L78 170Z M100 158 L122 146 L122 170Z" fill="#9FC8F5"/><circle cx="100" cy="158" r="6" fill="#7FB0EA"/>`)},
+  medal:   {slot:'neck', d:()=>`<path d="M78 150 L94 174 M122 150 L106 174" stroke="#7FB0EA" stroke-width="6"/>`+outlined(`<circle cx="100" cy="178" r="13" fill="#FFE08A"/>`)+star(100,178,6,'#FFFFFF')},
+  xscarf:  {slot:'neck', d:()=>outlined(`<path d="M60 148 Q100 166 140 148 L142 159 Q100 177 58 159Z" fill="#8FD1A8"/><path d="M120 160 L127 192 L114 194 L110 164Z" fill="#8FD1A8"/>`)+`<path d="M72 152 L70 163 M88 157 L86 168 M104 158 L102 169 M120 156 L118 167" stroke="#F07A7A" stroke-width="4"/>`},
+  knot:    {slot:'neck', d:()=>`<path d="M70 150 Q100 160 130 150" stroke="#F07A7A" stroke-width="4" fill="none"/>`+outlined(`<rect x="91" y="155" width="18" height="18" rx="3" fill="#F07A7A" transform="rotate(45 100 164)"/>`)},
+  // 背後
+  bag:     {slot:'back', d:()=>outlined(`<rect x="136" y="128" width="40" height="50" rx="12" fill="#FFD08A"/><rect x="144" y="148" width="24" height="14" rx="5" fill="#F5BC6A"/>`),f:()=>thick('M60 132 Q63 160 64 194 M140 132 Q137 160 136 194','#E8A85A',4)},
+  cape:    {slot:'back', d:()=>outlined(`<path d="M54 124 C38 168 40 200 48 212 L152 212 C160 200 162 168 146 124Z" fill="#B7A6E6"/>`),f:()=>outlined(`<circle cx="64" cy="146" r="5" fill="#FFE08A"/><circle cx="136" cy="146" r="5" fill="#FFE08A"/>`)},
+  herocape:{slot:'back', reward:true, d:()=>outlined(`<path d="M52 124 C30 170 34 204 44 216 L156 216 C166 204 170 170 148 124Z" fill="#F06A6A"/>`)+star(150,196,8,'#FFE08A',OL),f:()=>outlined(`<circle cx="64" cy="146" r="6" fill="#FFE08A"/><circle cx="136" cy="146" r="6" fill="#FFE08A"/>`)},
+  rocket:  {slot:'back', d:()=>mirror(outlined(`<rect x="24" y="112" width="24" height="60" rx="12" fill="#EEF2F6"/><path d="M26 172 L36 198 L46 172Z" fill="#FFB27A"/><rect x="24" y="130" width="24" height="7" fill="#F48A8A"/>`))},
+  vampcape:{slot:'back', d:()=>outlined(`<path d="M44 120 C28 168 34 202 42 214 L158 214 C166 202 172 168 156 120 L146 110 L100 132 L54 110Z" fill="#5A4A6E"/>`)+`<path d="M58 128 C48 168 52 198 58 208 L142 208 C148 198 152 168 142 128 L100 146Z" fill="#F07A7A"/>`},
+  // 衣服（畫在身體上）
+  tee:     {slot:'body', sleeve:'#FFFFFF', top:()=>`<path d="M50 150 L86 150 Q100 162 114 150 L150 150 L150 215 L50 215Z" fill="#FFFFFF"/><path d="M86 150 Q100 162 114 150" stroke="${OL}" stroke-width="1.8" fill="none"/>${star(100,184,7,'#FF9EC4')}`},
+  hoodie:  {slot:'body', sleeve:'#8C86A4', top:()=>`<path d="M50 150 L150 150 L150 215 L50 215Z" fill="#8C86A4"/><path d="M84 150 Q100 166 116 150" stroke="#A9A4BE" stroke-width="6" fill="none"/><path d="M94 160 L93 174 M106 160 L107 174" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/><rect x="84" y="184" width="32" height="12" rx="5" fill="#7A7492"/>`},
+  sequin:  {slot:'body', sleeve:'#D3B6FF', top:()=>`<path d="M50 150 L88 150 L100 166 L112 150 L150 150 L150 215 L50 215Z" fill="#E7B8F2"/>${[[76,166],[86,190],[114,184],[126,168],[100,200],[72,182],[130,196]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.4" fill="#FFFFFF"/>`).join('')}`},
+  plat:    {slot:'body', sleeve:'#FFFFFF', top:()=>`<path d="M50 150 L88 150 L100 166 L112 150 L150 150 L150 215 L50 215Z" fill="#FFFFFF"/><path d="M88 150 L100 166 L112 150" stroke="#E0A817" stroke-width="3" fill="none"/><circle cx="100" cy="180" r="3" fill="#E0A817"/><circle cx="100" cy="192" r="3" fill="#E0A817"/>`},
+  sweater: {slot:'body', sleeve:'#F48A8A', top:()=>`<path d="M50 150 L150 150 L150 215 L50 215Z" fill="#F48A8A"/><path d="M86 150 Q100 162 114 150" stroke="#FFFFFF" stroke-width="5" fill="none"/><path d="M60 174 L140 174" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5 5"/><path d="M100 178 L90 196 L110 196Z" fill="#8FD1A8"/>`},
+  redtop:  {slot:'body', sleeve:'#F07A7A', top:()=>`<path d="M50 150 L150 150 L150 215 L50 215Z" fill="#F07A7A"/>${[168,180,192].map(y=>`<path d="M92 ${y} L108 ${y}" stroke="#E8B84A" stroke-width="3" stroke-linecap="round"/>`).join('')}`},
+  // 手上
+  balloon: {slot:'hand', h:()=>`<path d="M0 0 Q-10 -40 6 -72" stroke="${OL}" stroke-width="1.6" fill="none"/>`+outlined(`<ellipse cx="8" cy="-92" rx="16" ry="20" fill="#F48A8A"/>`)+`<ellipse cx="2" cy="-99" rx="4" ry="7" fill="#FFFFFF" opacity=".7"/>`},
+  lightstick:{slot:'hand', h:()=>outlined(`<rect x="-3" y="-28" width="7" height="38" rx="3" fill="#FFFFFF"/>`)+heart(1,-42,12,'#FF9EC4',OL)},
+  mic:     {slot:'hand', h:()=>thick('M-2 10 L6 -24','#6A5D78',6)+outlined(`<circle cx="8" cy="-32" r="10" fill="#FFE08A"/>`)},
+  wand:    {slot:'hand', h:()=>thick('M0 6 L14 -34','#B7A6E6',4)+star(16,-44,12,'#FFE08A',OL)},
+  candybasket:{slot:'hand', h:()=>`<path d="M-14 4 Q0 -24 14 4" stroke="${OL}" stroke-width="3" fill="none"/>${PUMPKIN(0,18,15,true)}`},
+  pumpkinlamp:{slot:'hand', h:()=>`<path d="M0 0 L0 -6" stroke="${OL}" stroke-width="3"/>${PUMPKIN(0,16,16,true)}`},
+  candycane:{slot:'hand', h:()=>thick('M2 14 L2 -34 Q2 -48 14 -48 Q26 -48 26 -36','#FFFFFF',7)+`<path d="M2 14 L2 -34 Q2 -48 14 -48 Q26 -48 26 -36" stroke="#F07A7A" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="5 6"/>`},
+  lantern: {slot:'hand', h:()=>`<path d="M0 0 L0 -6" stroke="${OL}" stroke-width="3"/>`+outlined(`<ellipse cx="2" cy="18" rx="17" ry="15" fill="#F07A7A"/><rect x="-8" y="1" width="20" height="5" rx="2" fill="#FFE08A"/><rect x="-8" y="30" width="20" height="5" rx="2" fill="#FFE08A"/>`)},
+  redenv:  {slot:'hand', h:()=>outlined(`<rect x="-8" y="-20" width="24" height="32" rx="3" fill="#F07A7A" transform="rotate(12)"/><circle cx="6" cy="-3" r="6" fill="#FFE08A" transform="rotate(12)"/>`)},
+  trophy:  {slot:'hand', reward:true, h:()=>outlined(`<path d="M-10 -40 L18 -40 L16 -22 Q4 -12 -8 -22Z" fill="#FFE08A"/><path d="M-10 -36 Q-22 -36 -18 -26 Q-14 -22 -8 -24 M18 -36 Q30 -36 26 -26 Q22 -22 16 -24" fill="none"/><rect x="0" y="-16" width="8" height="10" fill="#FFE08A"/><rect x="-8" y="-6" width="24" height="8" rx="2" fill="#C99B5A"/>`)+star(4,-32,5,'#FFFFFF')},
+  book:    {slot:'hand', reward:true, h:()=>outlined(`<rect x="-14" y="-26" width="30" height="36" rx="3" fill="#9FC8F5"/><rect x="-10" y="-26" width="4" height="36" fill="#7FB0EA"/>`)+`<path d="M0 -14 L10 -14 M0 -6 L10 -6" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>`},
+  brush:   {slot:'hand', reward:true, h:()=>thick('M-4 10 L12 -34','#C79A6B',4)+outlined(`<path d="M10 -32 Q18 -46 16 -56 Q8 -46 8 -34Z" fill="#4E4658"/>`)},
+  magnifier:{slot:'hand', reward:true, h:()=>thick('M-2 12 L8 -10','#7A5A3C',5)+`<circle cx="14" cy="-22" r="13" fill="#E4F6FF" ${ol(OL,4)}/>`},
+};
+// 背景
+const BGS={
+  meadow:{name:'草地', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#DFF1FF"/><circle cx="170" cy="40" r="18" fill="#FFF1B0"/><path d="M-10 170 Q60 150 120 166 T210 160 L210 230 L-10 230Z" fill="#BFE7B4"/>${[[30,190],[60,206],[160,196],[190,210]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4" fill="#FFFFFF"/><circle cx="${x}" cy="${y}" r="1.6" fill="#FFD45C"/>`).join('')}`},
+  room:  {name:'練習室', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#F4EEFC"/>${[10,62,114,166].map(x=>`<rect x="${x}" y="18" width="46" height="150" rx="4" fill="#FCFAFF" stroke="#DCD2EE" stroke-width="2"/>`).join('')}<path d="M-10 120 L210 120" stroke="#C9BCE3" stroke-width="4"/><rect x="-10" y="186" width="220" height="44" fill="#EAD3B5"/>`},
+  neon:  {name:'霓虹舞台', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#E8E2FF"/>${[[30,'#FF9EC4'],[100,'#9FE0FF'],[170,'#C9B4FF']].map(([x,c])=>`<path d="M${x} 0 L${x-46} 230 L${x+46} 230Z" fill="${c}" opacity=".35"/>`).join('')}<rect x="-10" y="192" width="220" height="38" fill="#D3C8F5"/><path d="M-10 192 L210 192" stroke="#FF9EC4" stroke-width="3"/>`},
+  award: {name:'頒獎典禮', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#FFD9E2"/>${[-4,22,48,152,178,204].map(x=>`<path d="M${x} 0 Q${x+6} 90 ${x} 188" stroke="#F7B8C8" stroke-width="5" fill="none"/>`).join('')}<path d="M-10 0 Q100 36 210 0 L210 16 Q100 52 -10 16Z" fill="#FFE08A"/><rect x="-10" y="188" width="220" height="42" fill="#F4A9BC"/>`},
+  spooky:{name:'萬聖夜', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#D9CDF2"/><circle cx="160" cy="44" r="22" fill="#FFF6D6"/><path d="M-10 200 Q40 188 100 196 T210 192 L210 230 L-10 230Z" fill="#B9A9DE"/>${PUMPKIN(18,198,13,true)}${PUMPKIN(186,202,10,true)}`},
+  snow:  {name:'雪夜', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#DDEFFF"/><path d="M-10 196 Q60 184 120 194 T210 188 L210 230 L-10 230Z" fill="#FFFFFF"/><path d="M180 116 L156 182 L204 182Z" fill="#A8DDB8"/>${star(180,112,7,'#FFE08A')}${[[20,30],[60,60],[100,20],[140,50],[30,110],[120,110]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" fill="#FFFFFF"/>`).join('')}`},
+  cny:   {name:'新春', d:()=>`<rect x="-10" y="0" width="220" height="230" fill="#FFE1D6"/><rect x="-10" y="188" width="220" height="42" fill="#F7B7A3"/>${[20,180].map(x=>`<path d="M${x} 0 L${x} 22" stroke="${OL}" stroke-width="2"/><ellipse cx="${x}" cy="38" rx="16" ry="14" fill="#F07A7A"/>`).join('')}`},
+};
+const ANCHOR={head:[0,4], face:[0,-14], neck:[0,-6], hand:[138,178], back:[0,0]};
+function gear(wear,slot,part){
+  const id=wear&&wear[slot]; const g=id&&GEAR[id]; if(!g) return '';
+  const a=ANCHOR[slot]||[0,0];
+  if(slot==='hand') return at(a[0],a[1],g.h());
+  if(slot==='back') return part==='f' ? (g.f?at(a[0],a[1],g.f()):'') : at(a[0],a[1],g.d());
+  return at(a[0],a[1],g.d());
+}
+// 等級特效：frac = 目前等級 / 最高等級
+function levelFx(frac,front){
+  let s='';
+  if(!front){
+    if(frac>=1) s+=`<circle cx="100" cy="124" r="104" fill="#FFE9A8" opacity=".35"/>`;
+    if(frac>=.75) s+=`<ellipse cx="100" cy="214" rx="80" ry="11" fill="#FFF3A6" opacity=".8"/>`;
+    if(frac>=.5) s+=`<circle cx="100" cy="126" r="96" fill="none" stroke="#FFB3CF" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>`;
+    return s;
+  }
+  if(frac>=.25) s+=star(24,74,6,'#FFE08A',OL)+star(178,98,5,'#FFE08A',OL);
+  if(frac>=.75) s+=star(16,146,5,'#FFB3CF',OL)+star(186,44,6,'#9FD3FF',OL)+heart(176,150,6,'#FFB3CF',OL);
+  if(frac>=1) s+=`<ellipse cx="100" cy="26" rx="34" ry="8" fill="none" stroke="#E8B84A" stroke-width="5"/>`;
+  return s;
+}
+function animalSVG(sp,furKey,wear,opts={}){
+  const A=ANIMALS[sp]||ANIMALS.cat; const furs=A.furs; const f=furs[furKey]||Object.values(furs)[0];
+  const c=f[1], L=f[2], x=f[3]||{}, o=lineOf(c);
+  wear=wear||{}; const p=speciesParts(sp,c,L,o,x), u=uid();
+  const frac=opts.frac||0, s=.8+.2*frac;
+  const top=wear.body&&GEAR[wear.body]?GEAR[wear.body]:null;
+  const armFill=top?top.sleeve:p.armFill;
+  const wing=WINGS[opts.wings||'none']||WINGS.none;
+  const HR=p.headRx;
+  const inner=[
+    `<defs><clipPath id="${u}c"><ellipse cx="100" cy="178" rx="38" ry="31"/></clipPath><clipPath id="${u}h"><ellipse cx="100" cy="100" rx="${HR}" ry="50"/></clipPath></defs>`,
+    opts.bg&&wear.bg&&BGS[wear.bg]?BGS[wear.bg].d():'',
+    `<ellipse cx="100" cy="214" rx="${56*s}" ry="7" fill="${OL}" opacity=".12"/>`,
+    levelFx(frac,false),
+    `<g transform="translate(100 212) scale(${s}) translate(-100 -212)">`,
+    wing.d(),
+    gear(wear,'back'),
+    p.tail,
+    mirror(`<ellipse cx="85" cy="206" rx="13" ry="7.5" fill="${p.feet}" ${ol(lineOf(p.feet===c?c:p.feet))}/>`),
+    `<ellipse cx="100" cy="178" rx="38" ry="31" fill="${c}" ${ol(o)}/>`,
+    p.belly?`<ellipse cx="100" cy="184" rx="22" ry="18" fill="${L}"/>`:'',
+    p.bodySpots?`<g clip-path="url(#${u}c)">${[[76,166,6],[124,172,7],[110,196,5],[80,196,4]].map(([a,b,r])=>`<circle cx="${a}" cy="${b}" r="${r}" fill="#4F4A57"/>`).join('')}</g>`:'',
+    top?`<g clip-path="url(#${u}c)">${top.top()}</g><ellipse cx="100" cy="178" rx="38" ry="31" fill="none" ${ol(o)}/>`:'',
+    p.arms?mirror(`<ellipse cx="65" cy="174" rx="9" ry="13" fill="${armFill}" ${ol(o)} transform="rotate(28 65 174)"/>`):'',
+    gear(wear,'neck'),
+    p.ruff&&sp==='dog'?p.ruff:'',
+    p.ears,
+    `<ellipse cx="100" cy="100" rx="${HR}" ry="50" fill="${c}" ${ol(o)}/>`,
+    p.headMarks?`<g clip-path="url(#${u}h)">${p.headMarks}</g><ellipse cx="100" cy="100" rx="${HR}" ry="50" fill="none" ${ol(o)}/>`:'',
+    p.ruff&&sp==='cat'?p.ruff:'',
+    p.top||'',
+    p.face,
+    eyes(104,p.eye,p.ring), blush(118),
+    gear(wear,'back','f'), gear(wear,'face'), gear(wear,'head'), gear(wear,'hand'),
+    `</g>`,
+    levelFx(frac,true),
+  ];
+  return SVG(inner.join(''),opts.bg&&wear.bg);
+}
+function silhouetteSVG(sp){
+  return animalSVG(sp,null,{},{}).replace(/fill="#[0-9A-Fa-f]{6}"/g,'fill="#D8D1DF"').replace(/stroke="#[0-9A-Fa-f]{6}"/g,'stroke="#BDB5C7"').replace('</svg>',`<text x="100" y="118" text-anchor="middle" font-size="44" font-weight="800" fill="#FFFFFF" font-family="sans-serif">?</text></svg>`);
+}
+
+
+/* ================= 年級、科目與版本 ================= */
+const SUBJECTS = {
+  chinese:{name:'國語', glyph:'國', c:'#E0536A'},
+  math:   {name:'數學', glyph:'數', c:'#3E8FD6'},
+  life:   {name:'生活', glyph:'生', c:'#8A63D2'},
+  science:{name:'自然', glyph:'自', c:'#2E9468'},
+  social: {name:'社會', glyph:'社', c:'#D08A1C'},
+};
+// 依學校版本表：每個年級要上的科目和版本
+const GRADES = {
+  1:{label:'一年級', ver:{chinese:'康軒',math:'翰林',life:'康軒'}},
+  2:{label:'二年級', ver:{chinese:'康軒',math:'翰林',life:'康軒'}},
+  3:{label:'三年級', ver:{chinese:'翰林',math:'翰林',social:'康軒',science:'康軒'}},
+  4:{label:'四年級', ver:{chinese:'康軒',math:'翰林',social:'康軒',science:'康軒'}},
+  5:{label:'五年級', ver:{chinese:'南一',math:'康軒',social:'南一',science:'康軒'}},
+  6:{label:'六年級', ver:{chinese:'南一',math:'康軒',social:'翰林',science:'康軒'}},
+};
+const NUM=['','一','二','三','四','五','六'];
+function defaultSem(d=new Date()){ const m=d.getMonth()+1; return (m>=8||m===1)?'上':'下'; }
+const termOf=k=>k.grade+k.sem;                       // 例如 "3上"
+const termLabel=k=>NUM[k.grade]+k.sem;               // 例如 "三上"
+const subjectsOf=k=>Object.keys(GRADES[k.grade].ver);
+const bankOf=(k,s)=>((window.BANK||{})[termOf(k)]||{})[s]||[];
+
+const LV_NAME={1:'基礎',2:'陷阱題',3:'融會貫通'};
+const XP_FIRST={1:10,2:15,3:20}, XP_REPEAT=2, COIN_FIRST={1:10,2:15,3:15}, COIN_REPEAT=4;
+const LEVELS=[
+  {name:'練習生', req:{}},
+  {name:'新人', req:{xp:300}},
+  {name:'正式出道', req:{xp:900, medals:3, days:5}},
+  {name:'人氣偶像', req:{xp:1800, medals:5, days:10, lessons:1}},
+  {name:'巡迴演唱', req:{xp:3500, medals:8, days:18, lessons:3}},
+  {name:'頒獎典禮', req:{xp:6000, medals:11, days:30, lessons:5}},
+];
+const REQ_LABEL={xp:n=>`經驗值 ${n}`, medals:n=>`勳章 ${n} 枚`, days:n=>`練習 ${n} 天`, lessons:n=>`${n} 課全部學會`};
+const SEASONS={
+  halloween:{name:'萬聖節', from:[10,1], to:[11,10]},
+  xmas:{name:'聖誕節', from:[12,1], to:[1,6]},
+  cny:{name:'新春', from:[1,20], to:[2,28]},
+};
+const SLOTS=['head','face','neck','body','back','hand','bg'];
+const SLOT_NAME={head:'頭上',face:'臉上',neck:'脖子',body:'衣服',back:'背後',hand:'手上',bg:'背景'};
+const FREE_ITEMS=['tee','starclip','balloon','lightstick','meadow','room'];
+const ITEMS=[
+  {id:'tee',name:'練習服 T 恤',slot:'body',price:0},{id:'starclip',name:'星星髮夾',slot:'head',price:0},
+  {id:'balloon',name:'紅氣球',slot:'hand',price:0},{id:'lightstick',name:'愛心應援棒',slot:'hand',price:0},
+  {id:'meadow',name:'草地',slot:'bg',price:0},{id:'room',name:'練習室',slot:'bg',price:0},
+  {id:'hat',name:'探險帽',slot:'head',price:60},{id:'scarf',name:'紅領巾',slot:'neck',price:60},
+  {id:'goggles',name:'飛行護目鏡',slot:'face',price:80},{id:'bowtie',name:'藍色領結',slot:'neck',price:90},
+  {id:'bag',name:'冒險背包',slot:'back',price:100},{id:'flowers',name:'小花圈',slot:'head',price:120},
+  {id:'headset',name:'舞台耳麥',slot:'head',price:120},{id:'mic',name:'金色麥克風',slot:'hand',price:120},
+  {id:'starglass',name:'星星眼鏡',slot:'face',price:140},{id:'shades',name:'酷炫墨鏡',slot:'face',price:150},
+  {id:'wand',name:'魔法棒',slot:'hand',price:150},{id:'hoodie',name:'寬鬆帽 T',slot:'body',price:150},
+  {id:'cape',name:'冒險披風',slot:'back',price:180},{id:'neon',name:'霓虹舞台',slot:'bg',price:200},
+  {id:'sequin',name:'亮片舞台裝',slot:'body',price:260},
+  {id:'medal',name:'金牌',slot:'neck',price:250,medal:'perfect'},{id:'plat',name:'白金演出服',slot:'body',price:300,medal:'perfect'},
+  {id:'tiara',name:'閃耀頭冠',slot:'head',price:350,medalCount:4},{id:'crown',name:'閃亮皇冠',slot:'head',price:400,medalCount:6},
+  {id:'rocket',name:'火箭背包',slot:'back',price:500,rank:3},{id:'award',name:'頒獎典禮舞台',slot:'bg',price:450,rank:3},
+  {id:'witch',name:'女巫帽',slot:'head',price:150,season:'halloween'},{id:'pumpkinhat',name:'南瓜帽',slot:'head',price:150,season:'halloween'},
+  {id:'vampcape',name:'吸血鬼披風',slot:'back',price:220,season:'halloween'},{id:'candybasket',name:'南瓜糖果籃',slot:'hand',price:120,season:'halloween'},
+  {id:'pumpkinlamp',name:'南瓜燈',slot:'hand',price:120,season:'halloween'},{id:'spooky',name:'萬聖夜',slot:'bg',price:250,season:'halloween'},
+  {id:'santa',name:'聖誕帽',slot:'head',price:120,season:'xmas'},{id:'antlers',name:'麋鹿角',slot:'head',price:150,season:'xmas'},
+  {id:'xscarf',name:'聖誕圍巾',slot:'neck',price:120,season:'xmas'},{id:'candycane',name:'拐杖糖',slot:'hand',price:100,season:'xmas'},
+  {id:'sweater',name:'聖誕毛衣',slot:'body',price:200,season:'xmas'},{id:'snow',name:'雪夜',slot:'bg',price:250,season:'xmas'},
+  {id:'fuclip',name:'福字髮夾',slot:'head',price:100,season:'cny'},{id:'knot',name:'中國結',slot:'neck',price:100,season:'cny'},
+  {id:'redtop',name:'紅色唐裝',slot:'body',price:200,season:'cny'},{id:'lantern',name:'小燈籠',slot:'hand',price:120,season:'cny'},
+  {id:'redenv',name:'紅包',slot:'hand',price:88,season:'cny'},{id:'cny',name:'新春',slot:'bg',price:250,season:'cny'},
+  // 成就獎勵（不能用金幣買）
+  {id:'trophy',name:'金色獎盃',slot:'hand',reward:true},{id:'detective',name:'偵探帽',slot:'head',reward:true},
+  {id:'magnifier',name:'放大鏡',slot:'hand',reward:true},{id:'gradcap',name:'博士帽',slot:'head',reward:true},
+  {id:'herocape',name:'超人披風',slot:'back',reward:true},{id:'book',name:'故事書',slot:'hand',reward:true},
+  {id:'roundglass',name:'學霸眼鏡',slot:'face',reward:true},{id:'brush',name:'毛筆',slot:'hand',reward:true},
+];
+const isBg=id=>!!BGS[id];
+const MEDALS=[
+  {id:'chinese',name:'國語小達人',short:'國',desc:'國語第一次答對 30 題',test:k=>k.correct.chinese>=30,reward:{item:'brush'}},
+  {id:'math',name:'數學小達人',short:'數',desc:'數學第一次答對 30 題',test:k=>k.correct.math>=30},
+  {id:'science',name:'自然小達人',short:'自',desc:'自然第一次答對 30 題',test:k=>k.correct.science>=30},
+  {id:'social',name:'社會小達人',short:'社',desc:'社會第一次答對 30 題',test:k=>k.correct.social>=30},
+  {id:'life',name:'生活小達人',short:'生',desc:'生活第一次答對 30 題',test:k=>k.correct.life>=30},
+  {id:'perfect',name:'全對王',short:'滿',desc:'一回合 5 題全部答對',test:k=>k.perfects>=1,reward:{item:'trophy'}},
+  {id:'perfect5',name:'完美五連',short:'五',desc:'累積 5 個全對回合',test:k=>k.perfects>=5,reward:{wings:'rainbow'}},
+  {id:'trap20',name:'陷阱剋星',short:'陷',desc:'答對 20 題不同的陷阱題',test:k=>k.stats.trap>=20,reward:{item:'detective',item2:'magnifier'}},
+  {id:'deep20',name:'融會貫通大師',short:'融',desc:'答對 20 題不同的融會貫通題',test:k=>k.stats.deep>=20,reward:{item:'gradcap'}},
+  {id:'fix10',name:'錯題終結者',short:'改',desc:'把 10 題錯題重新答對',test:k=>k.stats.fixed>=10,reward:{item:'herocape'}},
+  {id:'streak3',name:'三天不間斷',short:'3',desc:'連續 3 天都有練習',test:k=>streak(k)>=3,reward:{animal:'rabbit'}},
+  {id:'streak7',name:'一週全勤',short:'7',desc:'連續 7 天都有練習',test:k=>streak(k)>=7,reward:{animal:'unicorn'}},
+  {id:'time30',name:'認真營員',short:'30',desc:'累積練習 30 分鐘',test:k=>k.seconds>=1800,reward:{item:'book'}},
+  {id:'time120',name:'讀書達人',short:'2h',desc:'累積練習 2 小時',test:k=>k.seconds>=7200,reward:{wings:'star'}},
+  {id:'lesson1',name:'課程制霸',short:'課',desc:'一整課的題目全部學會',test:k=>lessonsMastered(k)>=1,reward:{item:'roundglass'}},
+  {id:'collector',name:'勳章收藏家',short:'藏',desc:'收集 8 枚其他勳章',test:k=>k.medals.filter(m=>m!=='collector'&&m!=='legend').length>=8,reward:{animal:'dragon'}},
+  {id:'legend',name:'傳說偶像',short:'星',desc:'到達最高等級「頒獎典禮」',test:k=>levelOf(k)>=LEVELS.length-1,reward:{wings:'phoenix'}},
+];
+const BASE_ANIMALS=['cat','dog','bear','fox'], HIDDEN_ANIMALS=['rabbit','unicorn','dragon'];
+const FREE_WINGS=['none','angel','butterfly','bat','fairy'];
+function rewardText(r){ if(!r) return ''; if(r.animal) return '解鎖隱藏角色「'+ANIMALS[r.animal].name+'」'; if(r.wings) return '解鎖「'+WINGS[r.wings].name+'」'; const a=ITEMS.find(i=>i.id===r.item); const b=r.item2&&ITEMS.find(i=>i.id===r.item2); return '獲得「'+a.name+'」'+(b?'和「'+b.name+'」':''); }
+
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hash(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return h.toString(36); }
+const qid=(subj,q)=>subj+'|'+hash((q.l||'')+'|'+q.q);
+const lessonNo=l=>l?l.split(' ')[0]:'';
+function today(d=new Date()){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function streak(k){ const set=new Set(k.days); let n=0; const d=new Date(); if(!set.has(today(d))) d.setDate(d.getDate()-1); while(set.has(today(d))){ n++; d.setDate(d.getDate()-1); } return n; }
+function lessonsOf(k,s){ const out=[]; bankOf(k,s).forEach(q=>{ if(q.l && !out.includes(q.l)) out.push(q.l); }); return out; }
+function lessonsMastered(k){ let n=0; subjectsOf(k).forEach(s=>lessonsOf(k,s).forEach(l=>{ if(bankOf(k,s).filter(q=>q.l===l).every(q=>k.mastered.includes(qid(s,q)))) n++; })); return n; }
+function metric(k,key){ return key==='xp'?k.xp: key==='medals'?k.medals.length: key==='days'?k.days.length: lessonsMastered(k); }
+function levelOf(k){ let i=0; for(let j=1;j<LEVELS.length;j++){ if(Object.entries(LEVELS[j].req).every(([key,v])=>metric(k,key)>=v)) i=j; else break; } return i; }
+function seasonOpen(id,d=new Date()){ const s=SEASONS[id]; const md=(d.getMonth()+1)*100+d.getDate(), a=s.from[0]*100+s.from[1], b=s.to[0]*100+s.to[1]; return a<=b?(md>=a&&md<=b):(md>=a||md<=b); }
+const animalUnlocked=(k,a)=>BASE_ANIMALS.includes(a)||k.animals.includes(a);
+const wingsUnlocked=(k,w)=>FREE_WINGS.includes(w)||k.wingsOwned.includes(w);
+
+/* ================= 存檔：本機 + Google 試算表 ================= */
+const KEY='practice-camp-v5', CFG_KEY='practice-camp-cloud';
+function newKid(name,grade,sem){
+  return {id:'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), name, grade, sem, coins:0, xp:0, days:[],
+    correct:{chinese:0,math:0,science:0,social:0,life:0}, rounds:{chinese:0,math:0,science:0,social:0,life:0},
+    perfects:0, seconds:0, medals:[], mastered:[], missed:[], stats:{trap:0,deep:0,fixed:0},
+    animal:'cat', fur:'orange', wings:'none', animals:[], wingsOwned:[], owned:FREE_ITEMS.slice(),
+    wear:{head:'starclip',face:null,neck:null,body:'tee',back:null,hand:null,bg:'meadow'}, setup:false, updated:0};
+}
+function fixKid(k){
+  const n=newKid(k.name||'小隊員',k.grade||3,k.sem||defaultSem());
+  const out=Object.assign(n,k);
+  out.correct=Object.assign(n.correct,k.correct||{}); out.rounds=Object.assign(n.rounds,k.rounds||{});
+  out.stats=Object.assign({trap:0,deep:0,fixed:0},k.stats||{}); out.wear=Object.assign({head:null,face:null,neck:null,body:null,back:null,hand:null,bg:'meadow'},k.wear||{});
+  out.owned=[...new Set([...(k.owned||[]),...FREE_ITEMS])].filter(id=>ITEMS.some(i=>i.id===id));
+  if(!ANIMALS[out.animal]) { out.animal='cat'; out.fur='orange'; }
+  return out;
+}
+let DB={kids:[], current:null};
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw) DB=JSON.parse(raw);
+  else { const old=localStorage.getItem('practice-camp-v4'); if(old){ const o=JSON.parse(old);
+    DB.kids=(o.kids||[]).map(k=>fixKid({id:k.id,name:k.name,grade:k.grade,sem:'上',coins:k.coins,xp:k.xp,days:k.days,correct:k.correct,rounds:k.rounds,perfects:k.perfects,seconds:k.seconds,medals:(k.medals||[]).filter(m=>MEDALS.some(x=>x.id===m)),stats:k.stats})); DB.current=o.current; } }
+}catch(e){}
+DB.kids=DB.kids.map(fixKid);
+let S=DB.kids.find(k=>k.id===DB.current)||null;
+let CFG={url:'',key:''}; try{ CFG=Object.assign(CFG,JSON.parse(localStorage.getItem(CFG_KEY)||'{}')); }catch(e){}
+let cloud={state:CFG.url?'connecting':'off', msg:''}, pushTimer=null, logQueue=[], dirty=new Set();
+function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+function save(){ if(S){ S.updated=Date.now(); dirty.add(S.id); } saveLocal(); schedulePush(); }
+function schedulePush(){ if(!CFG.url) return; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,1500); }
+async function api(body){
+  const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify(Object.assign({key:CFG.key},body))});
+  const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤'); return j;
+}
+async function pushNow(){
+  if(!CFG.url) return;
+  try{
+    for(const id of [...dirty]){ const k=DB.kids.find(x=>x.id===id); if(k){ const stamp=k.updated; k.synced=stamp; await api({action:'saveKid',kid:k}); } dirty.delete(id); }
+    saveLocal();
+    if(logQueue.length){ const rows=logQueue.splice(0); try{ await api({action:'log',rows}); }catch(e){ logQueue.unshift(...rows); throw e; } }
+    setCloud('ok','已同步到雲端');
+  }catch(e){ setCloud('error','同步失敗：'+e.message+'（資料先存在平板上，連線後會再試）'); }
+}
+async function pullCloud(){
+  if(!CFG.url){ setCloud('off',''); return false; }
+  try{
+    const r=await fetch(CFG.url+(CFG.url.includes('?')?'&':'?')+'action=load&key='+encodeURIComponent(CFG.key));
+    const j=await r.json(); if(!j.ok) throw new Error(j.error||'雲端回應錯誤');
+    // 以雲端為主；平板上還沒上傳的新資料保留下來並補傳
+    const server=(j.kids||[]).map(fixKid), merged=[];
+    server.forEach(sk=>{ const lk=DB.kids.find(x=>x.id===sk.id); if(lk && (lk.updated||0)>(sk.updated||0)){ merged.push(lk); dirty.add(lk.id); } else merged.push(sk); });
+    DB.kids.forEach(lk=>{ if(!server.some(x=>x.id===lk.id) && (lk.updated||0)>(lk.synced||0)){ merged.push(lk); dirty.add(lk.id); } });
+    DB.kids=merged;
+    S=DB.kids.find(k=>k.id===DB.current)||null; if(!S){ DB.current=null; }
+    saveLocal(); setCloud('ok','已從雲端載入'); if(dirty.size) pushNow(); return true;
+  }catch(e){ setCloud('error','連不上雲端：'+e.message+'（先用平板上的資料）'); return false; }
+}
+function setCloud(state,msg){ cloud={state,msg}; const el=$('#cloudDot'); if(el){ el.dataset.state=state; el.title=msg; el.textContent=state==='ok'?'雲端已同步':state==='error'?'離線中':state==='connecting'?'連線中':'只存在這台平板'; } }
+function logAnswer(q,chosen,ok){
+  if(!CFG.url) return;
+  logQueue.push({time:new Date().toISOString(), kid:S.name, kidId:S.id, term:termLabel(S), subject:SUBJECTS[quiz.subj].name, lesson:q.l||'', unit:q.u, level:LV_NAME[q.lv||1], question:q.q, chosen:q.o[chosen], answer:q.o[q.a], ok});
+}
+
+/* ================= 角色 ================= */
+const charSVG=(k,opts={})=>animalSVG(opts.animal||k.animal, opts.fur||k.fur, opts.wear||k.wear, {wings:opts.wings??k.wings, bg:opts.bg, frac:opts.frac??levelOf(k)/(LEVELS.length-1)});
+const av=(svg,cls='')=>`<span class="av ${cls}">${svg}</span>`;
+function poke(el){ if(!el) return; el.classList.remove('bounce','idle'); void el.offsetWidth; el.classList.add('bounce'); el.addEventListener('animationend',()=>el.classList.remove('bounce'),{once:true}); }
+document.addEventListener('click',e=>{ const a=e.target.closest('.av'); if(a && !a.closest('button')) poke(a); });
+
+/* ================= 共用 ================= */
+let tab = !S ? 'who' : (S.setup ? 'learn' : 'setup'), quiz=null, tick=null, newGrade=3, newSem=defaultSem(), parentOpen=false;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,3000); }
+function grant(r){
+  if(!r) return;
+  if(r.animal && !S.animals.includes(r.animal)) S.animals.push(r.animal);
+  if(r.wings && !S.wingsOwned.includes(r.wings)) S.wingsOwned.push(r.wings);
+  [r.item,r.item2].forEach(id=>{ if(id && !S.owned.includes(id)) S.owned.push(id); });
+}
+function checkMedals(){
+  const got=[];
+  for(let pass=0;pass<2;pass++) MEDALS.forEach(m=>{ if(!S.medals.includes(m.id) && m.test(S)){ S.medals.push(m.id); grant(m.reward); got.push('「'+m.name+'」'+(m.reward?'，'+rewardText(m.reward):'')); } });
+  if(got.length){ save(); setTimeout(()=>toast('獲得勳章 '+got.join('；')+'！'),400); }
+}
+function canBuy(it){
+  if(it.season && !seasonOpen(it.season)) return {ok:false, why:`${SEASONS[it.season].from[0]}/${SEASONS[it.season].from[1]} 開放`};
+  if(it.medal && !S.medals.includes(it.medal)) return {ok:false, why:'需要「'+MEDALS.find(m=>m.id===it.medal).name+'」勳章'};
+  if(it.medalCount && S.medals.length<it.medalCount) return {ok:false, why:`需要 ${it.medalCount} 枚勳章（目前 ${S.medals.length}）`};
+  if(it.rank && levelOf(S)<it.rank) return {ok:false, why:`到達「${LEVELS[it.rank].name}」才能換`};
+  if(S.coins<it.price) return {ok:false, why:`還差 ${it.price-S.coins} 金幣`};
+  return {ok:true};
+}
+function progressBox(){
+  const i=levelOf(S), nx=LEVELS[i+1];
+  if(!nx) return `<div class="rank"><b>${LEVELS[i].name}</b><p>已經站上最高舞台！</p></div>`;
+  const items=Object.entries(nx.req).map(([key,v])=>{ const cur=metric(S,key), ok=cur>=v; return `<li class="${ok?'ok':''}"><span>${ok?'✓':'○'}</span>${REQ_LABEL[key](v)}<em>${key==='xp'?cur:cur+' / '+v}</em></li>`; }).join('');
+  const pct=Math.min(100,Math.max(0,(S.xp-(LEVELS[i].req.xp||0))/(nx.req.xp-(LEVELS[i].req.xp||0))*100));
+  return `<div class="rank"><b>${LEVELS[i].name}</b><p>升級到「${nx.name}」要同時達成：</p><div class="meter"><i style="width:${pct}%"></i></div><ul class="reqs">${items}</ul></div>`;
+}
+function renderSide(){
+  const side=$('#sideBody');
+  if(!S){ side.innerHTML=`<div class="stage full">${av(animalSVG('cat','orange',{bg:'meadow',head:'starclip',body:'tee'},{bg:true}),'idle')}</div><p class="sub" style="margin-top:12px">先在右邊建立營員檔案，每位小朋友會有自己的角色、金幣和勳章。</p>`; return; }
+  side.innerHTML=`<div class="stage full">${av(charSVG(S,{bg:true}),'idle')}</div>
+    <div class="who"><b class="kidname">${esc(S.name)}</b><button class="chip" id="editKid" title="修改年級">${termLabel(S)} ✎</button></div>
+    ${progressBox()}
+    <div class="stats"><div class="stat coin"><b>${S.coins}</b><span>金幣</span></div><div class="stat"><b>${S.xp}</b><span>經驗值</span></div><div class="stat"><b>${S.medals.length}</b><span>勳章</span></div></div>
+    <div class="actions" style="justify-content:stretch"><button class="btn ghost" style="flex:1" id="switchKid">換人練習</button></div>`;
+  $('#switchKid').onclick=()=>{ stopQuiz(); tab='who'; render(); };
+  $('#editKid').onclick=()=>{ stopQuiz(); tab='profile'; render(); };
+}
+function renderTabs(){
+  const nav=$('#tabs');
+  if(!S || ['who','setup','profile'].includes(tab)){ nav.hidden=true; return; }
+  nav.hidden=false;
+  const t=[['learn','練習場'],['review','錯題本'],['look','造型室'],['shop','商店'],['medals','勳章牆']];
+  nav.innerHTML=t.map(([k,n])=>`<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab===k}">${n}</button>`).join('');
+  nav.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(quiz && b.dataset.tab!=='learn') stopQuiz(); if(quiz&&quiz.done) quiz=null; tab=b.dataset.tab; render(); });
+}
+
+/* ================= 頁面 ================= */
+function render(){
+  renderSide(); renderTabs(); setCloud(cloud.state,cloud.msg);
+  const p=$('#panel'); p.style.removeProperty('--c');
+  if(tab==='who' || !S) return parentOpen?renderParent(p):renderWho(p);
+  if(tab==='setup') return renderLook(p,true);
+  if(tab==='profile') return renderProfile(p);
+  if(tab==='learn') return quiz?renderQuiz(p):renderLearn(p);
+  if(tab==='review') return renderReview(p);
+  if(tab==='look') return renderLook(p,false);
+  if(tab==='shop') return renderShop(p);
+  if(tab==='medals') return renderMedals(p);
+}
+function gradePicker(g,s){
+  return `<div class="optrow"><h4>年級</h4><div class="swatches">${[1,2,3,4,5,6].map(n=>`<button type="button" class="choice" data-grade="${n}" aria-pressed="${n===g}">${GRADES[n].label}</button>`).join('')}</div></div>
+  <div class="optrow"><h4>學期</h4><div class="swatches">${['上','下'].map(x=>`<button type="button" class="choice" data-sem="${x}" aria-pressed="${x===s}">${x}學期</button>`).join('')}</div></div>`;
+}
+function renderWho(p){
+  p.innerHTML=`<div class="qhead"><h2>誰要來練習？</h2><span class="cloud" id="cloudDot"></span></div><p class="sub">每位小朋友有自己的角色、金幣、勳章和題目，互相不會影響。</p>
+  ${DB.kids.length?`<div class="kids">${DB.kids.map(k=>`<button class="kid" data-k="${k.id}"><span class="stage">${av(charSVG(k))}</span><span><b>${esc(k.name)}</b><small>${termLabel(k)}・${LEVELS[levelOf(k)].name}・${k.medals.length} 勳章</small></span></button>`).join('')}</div>`:''}
+  <div class="section-t">新增營員</div>
+  <form id="addKid"><div class="addkid"><input id="kidName" maxlength="10" placeholder="小朋友的名字" aria-label="小朋友的名字"></div>${gradePicker(newGrade,newSem)}<button class="btn hot" type="submit">建立</button></form>
+  <div class="actions"><button class="btn ghost" id="openParent">家長設定</button></div>`;
+  p.querySelectorAll('.kid').forEach(b=>b.onclick=()=>{ DB.current=b.dataset.k; S=DB.kids.find(k=>k.id===DB.current); saveLocal(); tab=S.setup?'learn':'setup'; render(); });
+  p.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{ newGrade=+b.dataset.grade; p.querySelectorAll('[data-grade]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
+  p.querySelectorAll('[data-sem]').forEach(b=>b.onclick=()=>{ newSem=b.dataset.sem; p.querySelectorAll('[data-sem]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
+  $('#addKid').addEventListener('submit',e=>{ e.preventDefault(); const n=$('#kidName').value.trim(); if(!n){ $('#kidName').focus(); toast('請先輸入名字'); return; }
+    const k=newKid(n,newGrade,newSem); DB.kids.push(k); DB.current=k.id; S=k; save(); tab='setup'; render(); });
+  $('#openParent').onclick=()=>{ parentOpen=true; render(); };
+  setCloud(cloud.state,cloud.msg);
+}
+function renderParent(p){
+  const locked = CFG.key && !renderParent.ok;
+  if(locked){
+    p.innerHTML=`<h2>家長設定</h2><p class="sub">請輸入家庭密碼。</p><form id="pw" class="addkid"><input id="pwIn" type="password" placeholder="家庭密碼" aria-label="家庭密碼"><button class="btn hot">確認</button></form><div class="actions"><button class="btn ghost" id="back">返回</button></div>`;
+    $('#pw').onsubmit=e=>{ e.preventDefault(); if($('#pwIn').value===CFG.key){ renderParent.ok=true; render(); } else toast('密碼不對'); };
+    $('#back').onclick=()=>{ parentOpen=false; render(); }; return;
+  }
+  p.innerHTML=`<h2>家長設定</h2>
+  <p class="sub">設定後，成績會存到你的 Google 試算表，換平板或清除瀏覽器資料都不會不見。每台平板設定一次即可。</p>
+  <form id="cfg">
+    <div class="optrow"><h4>Apps Script 網址</h4><input class="field" id="cfgUrl" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/……/exec"></div>
+    <div class="optrow"><h4>家庭密碼（和 Apps Script 裡設定的一樣）</h4><input class="field" id="cfgKey" type="password" value="${esc(CFG.key)}"></div>
+    <div class="actions" style="justify-content:flex-start"><button class="btn hot">儲存並連線</button><button type="button" class="btn ghost" id="cfgOff">改回只存在這台平板</button></div>
+  </form>
+  <p class="sub" id="cfgMsg">${esc(cloud.msg||'')}</p>
+  <div class="actions"><button class="btn ghost" id="back">返回</button></div>`;
+  $('#cfg').onsubmit=async e=>{ e.preventDefault(); CFG={url:$('#cfgUrl').value.trim(), key:$('#cfgKey').value}; try{ localStorage.setItem(CFG_KEY,JSON.stringify(CFG)); }catch(_){}
+    setCloud('connecting',''); $('#cfgMsg').textContent='連線中……';
+    DB.kids.forEach(k=>{ if(!k.synced) k.updated=Math.max(k.updated||0,1); });
+    const ok=await pullCloud(); if(ok) await pushNow();
+    renderParent.ok=true; render(); };
+  $('#cfgOff').onclick=()=>{ CFG={url:'',key:''}; try{ localStorage.removeItem(CFG_KEY); }catch(_){} setCloud('off',''); render(); };
+  $('#back').onclick=()=>{ parentOpen=false; render(); };
+}
+function renderProfile(p){
+  let g=S.grade, s=S.sem;
+  p.innerHTML=`<h2>營員資料</h2><p class="sub">升上新年級或新學期時，在這裡修改，題目會換成那個年級的課本內容。金幣、勳章和造型都會保留。</p>
+  <div class="optrow"><h4>名字</h4><input class="field" id="pName" maxlength="10" value="${esc(S.name)}"></div>
+  ${gradePicker(g,s)}
+  <div class="actions"><button class="btn ghost" id="cancel">取消</button><button class="btn hot" id="saveP">儲存</button></div>`;
+  p.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{ g=+b.dataset.grade; p.querySelectorAll('[data-grade]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
+  p.querySelectorAll('[data-sem]').forEach(b=>b.onclick=()=>{ s=b.dataset.sem; p.querySelectorAll('[data-sem]').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
+  $('#cancel').onclick=()=>{ tab='learn'; render(); };
+  $('#saveP').onclick=()=>{ S.name=$('#pName').value.trim()||S.name; S.grade=g; S.sem=s; save(); tab='learn'; render(); toast('已改成'+termLabel(S)); };
+}
+
+/* ---- 造型室 ---- */
+function renderLook(p,first){
+  const furs=ANIMALS[S.animal].furs;
+  const animalCards=[...BASE_ANIMALS,...HIDDEN_ANIMALS].map(a=>{ const ok=animalUnlocked(S,a); const m=MEDALS.find(x=>x.reward&&x.reward.animal===a);
+    return `<button class="pcard ${ok?'':'locked'}" data-animal="${a}" aria-pressed="${S.animal===a}" ${ok?'':'disabled'}>${av(ok?animalSVG(a,a===S.animal?S.fur:null,{},{}):silhouetteSVG(a))}${ok?ANIMALS[a].name:'隱藏角色'}<small>${ok?(ANIMALS[a].hidden?'隱藏版':'　'):'破成就「'+m.name+'」'}</small></button>`; }).join('');
+  const furBtns=Object.entries(furs).map(([k,v])=>`<button class="choice furchip" data-fur="${k}" aria-pressed="${S.fur===k}"><i style="background:${v[1]}"></i>${v[0]}</button>`).join('');
+  const wingBtns=Object.entries(WINGS).map(([k,w])=>{ const ok=wingsUnlocked(S,k); const m=MEDALS.find(x=>x.reward&&x.reward.wings===k);
+    return `<button class="choice" data-wings="${k}" aria-pressed="${S.wings===k}" ${ok?'':'disabled'} title="${ok?'':'破成就「'+m.name+'」'}">${ok?'':'🔒 '}${w.name}</button>`; }).join('');
+  const owned=ITEMS.filter(it=>S.owned.includes(it.id));
+  const bySlot=SLOTS.map(sl=>{ const list=owned.filter(it=>it.slot===sl); return list.length?`<div class="section-t">${SLOT_NAME[sl]}</div><div class="grid">${list.map(it=>itemCard(it,'closet')).join('')}</div>`:''; }).join('');
+  p.innerHTML=`<h2>${first?esc(S.name)+'，選一位偶像夥伴！':'造型室'}</h2>
+  <p class="sub">${first?'角色、品種和翅膀都可以隨時回來換。隱藏版角色和特殊翅膀要破成就才會出現。':'角色、品種、翅膀免費隨意換；下面是你擁有的裝扮，點一下就能穿上或脫下。'}</p>
+  <div class="designer">
+    <div class="stage full" id="preview">${av(charSVG(S,{bg:true}))}</div>
+    <div>
+      <div class="optrow"><h4>${S.animal==='cat'||S.animal==='dog'?'品種':'毛色'}</h4><div class="swatches">${furBtns}</div></div>
+      <div class="optrow"><h4>翅膀</h4><div class="swatches">${wingBtns}</div></div>
+      ${first?'':`<div class="actions" style="justify-content:flex-start"><button class="btn ghost" id="undress">全部脫下</button></div>`}
+    </div>
+  </div>
+  <div class="section-t">角色</div><div class="cards">${animalCards}</div>
+  ${first?`<div class="actions"><button class="btn hot" id="done">就決定是牠了，開始練習！</button></div>`:bySlot}`;
+  const refresh=()=>{ save(); render(); poke($('#preview .av')); };
+  p.querySelectorAll('[data-animal]:not([disabled])').forEach(b=>b.onclick=()=>{ S.animal=b.dataset.animal; S.fur=Object.keys(ANIMALS[S.animal].furs)[0]; refresh(); });
+  p.querySelectorAll('[data-fur]').forEach(b=>b.onclick=()=>{ S.fur=b.dataset.fur; refresh(); });
+  p.querySelectorAll('[data-wings]:not([disabled])').forEach(b=>b.onclick=()=>{ S.wings=b.dataset.wings; refresh(); });
+  const u=$('#undress'); if(u) u.onclick=()=>{ SLOTS.forEach(k=>{ if(k!=='bg') S.wear[k]=null; }); refresh(); };
+  const d=$('#done'); if(d) d.onclick=()=>{ S.setup=true; save(); tab='learn'; render(); };
+  bindItems(p);
+}
+
+/* ---- 練習 ---- */
+function renderLearn(p){
+  const G=GRADES[S.grade];
+  const cards=subjectsOf(S).map(k=>{ const s=SUBJECTS[k], bank=bankOf(S,k), total=bank.length;
+    if(!total) return `<div class="subj empty-subj" style="--c:${s.c}"><span class="glyph">${s.glyph}</span><span><h3>${s.name}</h3><p class="ver">${G.ver[k]}版・${termLabel(S)}</p><p>等待上傳課本資料</p></span></div>`;
+    const got=bank.filter(q=>S.mastered.includes(qid(k,q))).length;
+    return `<button class="subj" data-s="${k}" style="--c:${s.c}"><span class="glyph">${s.glyph}</span><span><h3>${s.name}</h3><p class="ver">${G.ver[k]}版・${termLabel(S)}・${lessonsOf(S,k).length} 課</p><div class="bar"><i style="width:${got/total*100}%"></i></div><p>已學會 ${got} / ${total} 題・各課混合出題</p></span></button>`; }).join('');
+  p.innerHTML=`<h2>${esc(S.name)}，今天想練習哪一課？</h2>
+  <p class="sub">每回合 5 題：3 題基礎、2 題陷阱或融會貫通。第一次答對才有完整經驗值。</p>
+  ${lessonsHTML()}
+  <div class="section-t">各科總複習</div><div class="subjects">${cards}</div>
+  ${S.missed.length?`<div class="actions" style="justify-content:flex-start"><button class="btn ghost" id="goReview">錯題本：還有 ${S.missed.length} 題要再練</button></div>`:''}`;
+  p.querySelectorAll('.subj[data-s]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.s));
+  p.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.subj,null,b.dataset.lesson));
+  const r=$('#goReview'); if(r) r.onclick=()=>{tab='review'; render();};
+}
+function lessonsHTML(){
+  const rows=[];
+  subjectsOf(S).forEach(k=>lessonsOf(S,k).forEach(l=>{
+    const qs=bankOf(S,k).filter(q=>q.l===l), got=qs.filter(q=>S.mastered.includes(qid(k,q))).length, c=n=>qs.filter(q=>(q.lv||1)===n).length;
+    rows.push(`<button class="lesson" data-subj="${k}" data-lesson="${esc(l)}" style="--c:${SUBJECTS[k].c}"><span class="pill">${SUBJECTS[k].name}・${lessonNo(l)}</span><b>${esc(l.split(' ').slice(1).join(' '))}</b><span class="lmeta">已學會 ${got} / ${qs.length} 題・基礎 ${c(1)}・陷阱 ${c(2)}・融會貫通 ${c(3)}</span><div class="bar"><i style="width:${got/qs.length*100}%"></i></div>${got===qs.length?'<span class="lmeta"><b>這課已全部學會！</b></span>':''}</button>`);
+  }));
+  return rows.length?`<div class="section-t">照課本出題</div><div class="lessons">${rows.join('')}</div>`:`<div class="empty"><p>${termLabel(S)}的課本資料還沒上傳，上傳後題目會出現在這裡。</p></div>`;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startQuiz(subj, onlyQs, lesson){
+  const bank=bankOf(S,subj);
+  const qs0 = onlyQs || (()=>{
+    const all=bank.filter(q=>!lesson || q.l===lesson);
+    const order=list=>{ const missed=shuffle(list.filter(q=>S.missed.includes(qid(subj,q)))), fresh=shuffle(list.filter(q=>!S.mastered.includes(qid(subj,q))&&!S.missed.includes(qid(subj,q)))), done=shuffle(list.filter(q=>S.mastered.includes(qid(subj,q)))); return [...missed,...fresh,...done]; };
+    const adv=order(all.filter(q=>(q.lv||1)>1)), basic=order(all.filter(q=>(q.lv||1)===1));
+    if(!adv.length) return basic.slice(0,5);
+    const pickB=basic.slice(0,Math.max(3,5-adv.length)), pickA=adv.slice(0,5-pickB.length);
+    return [...shuffle(pickB),...shuffle(pickA)];
+  })();
+  if(!qs0.length){ toast('這裡還沒有題目'); return; }
+  quiz={subj, qs:qs0.map(q=>({...q, order:shuffle(q.o.map((_,j)=>j))})), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
+  clearInterval(tick); tick=setInterval(()=>{ if(document.visibilityState==='visible'){ S.seconds++; if(S.seconds%30===0){ save(); checkMedals(); } } },1000);
+  tab='learn'; render();
+}
+function stopQuiz(){ clearInterval(tick); tick=null; quiz=null; if(S) save(); }
+function renderQuiz(p){
+  const s=SUBJECTS[quiz.subj]; p.style.setProperty('--c',s.c);
+  if(quiz.i>=quiz.qs.length) return renderResult(p);
+  const q=quiz.qs[quiz.i], n=quiz.qs.length, lv=q.lv||1;
+  const dots=quiz.qs.map((_,i)=>`<i class="${i<quiz.results.length?(quiz.results[i]?'ok':'no'):(i===quiz.i?'now':'')}"></i>`).join('');
+  let fb='';
+  if(quiz.picked!==null){
+    const ok=quiz.picked===q.a, g=quiz.last;
+    const gain=g?`+${g.coins} 金幣・+${g.xp} 經驗值${g.repeat?'（已學會的題目）':''}`:'';
+    fb = ok ? `<div class="feedback good pop">${av(charSVG(S),'bounce')}<div><h3>${lv===2?'陷阱沒騙到你！':lv===3?'融會貫通，太厲害了！':'答對了！'}</h3><p class="note">${gain}</p><p>${q.why}</p></div></div>`
+      : `<div class="feedback bad pop">${av(charSVG(S),'droop')}<div><h3>差一點點！我們一起看看哪裡錯了</h3><p>你選了「${q.o[quiz.picked]}」，正確答案是「<b>${q.o[q.a]}</b>」。</p>${q.trap&&q.trap[quiz.picked]?`<div class="why"><b>你可能是這樣想的：</b>${q.trap[quiz.picked]}</div>`:''}<div class="why"><b>為什麼：</b>${q.why}</div><p class="note">這題已放進錯題本，之後再答對可以拿回經驗值。</p></div></div>`;
+  }
+  p.innerHTML=`<div class="qhead"><span class="qtags">${lv>1?`<span class="lvtag lv${lv}">${LV_NAME[lv]}</span>`:''}<span class="pill">${s.name}・${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span><span class="qcount">第 ${quiz.i+1} / ${n} 題</span></span><div class="dots">${dots}</div></div>
+  <div class="question">${q.q}</div>
+  <div class="opts">${q.order.map(i=>{ let cls=''; if(quiz.picked!==null){ if(i===q.a) cls='right'; else if(i===quiz.picked) cls='wrong'; } return `<button class="opt ${cls}" data-i="${i}" ${quiz.picked!==null?'disabled':''}>${q.o[i]}</button>`;}).join('')}</div>
+  ${fb}
+  <div class="actions"><button class="btn ghost" id="quitQ">離開這回合</button>${quiz.picked!==null?`<button class="btn hot" id="nextQ">${quiz.i===n-1?'看成績':'下一題'}</button>`:''}</div>`;
+  p.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  $('#quitQ').onclick=()=>{ stopQuiz(); render(); };
+  const nx=$('#nextQ'); if(nx){ nx.onclick=()=>{quiz.i++; quiz.picked=null; quiz.last=null; render();}; nx.focus({preventScroll:true}); }
+}
+function answer(i){
+  const q=quiz.qs[quiz.i], id=qid(quiz.subj,q), lv=q.lv||1; quiz.picked=i;
+  const ok=i===q.a; quiz.results.push(ok);
+  const before=levelOf(S);
+  if(!S.days.includes(today())) S.days.push(today());
+  if(ok){
+    const wasMastered=S.mastered.includes(id), wasMissed=S.missed.includes(id);
+    const xp=wasMastered?XP_REPEAT:XP_FIRST[lv], coins=wasMastered?COIN_REPEAT:COIN_FIRST[lv];
+    S.coins+=coins; S.xp+=xp; quiz.earned+=coins; quiz.xp+=xp; quiz.last={xp,coins,repeat:wasMastered};
+    if(!wasMastered){ quiz.fresh++; S.correct[quiz.subj]=(S.correct[quiz.subj]||0)+1; if(lv===2) S.stats.trap++; if(lv===3) S.stats.deep++; if(wasMissed) S.stats.fixed++; S.mastered.push(id); }
+    S.missed=S.missed.filter(x=>x!==id);
+  } else { if(!S.missed.includes(id)) S.missed.push(id); S.mastered=S.mastered.filter(x=>x!==id); }
+  logAnswer(q,i,ok);
+  save(); checkMedals(); render();
+  const after=levelOf(S); if(after>before) setTimeout(()=>toast(`升級了！現在是「${LEVELS[after].name}」`),900);
+}
+function renderResult(p){
+  const n=quiz.qs.length, right=quiz.results.filter(Boolean).length;
+  if(!quiz.done){ quiz.done=true; clearInterval(tick); tick=null; S.rounds[quiz.subj]=(S.rounds[quiz.subj]||0)+1;
+    if(right===5 && n===5){ S.coins+=20; quiz.earned+=20; S.perfects++; if(quiz.fresh>=3){ S.xp+=20; quiz.xp+=20; } }
+    save(); checkMedals(); renderSide(); pushNow(); }
+  p.innerHTML=`<div class="result">${av(charSVG(S),'bounce')}<h2>${right===n?'全部答對，太厲害了！':right>=n/2?'做得很好！':'有進步空間，再試一次吧！'}</h2><div class="big">${right} / ${n}</div>
+  <p class="sub">這回合拿到 ${quiz.earned} 金幣、${quiz.xp} 經驗值${right===5&&n===5?'（含全對加碼）':''}。</p>
+  <div class="actions" style="justify-content:center"><button class="btn hot" id="again">再玩一回合</button><button class="btn ghost" id="home">回練習場</button><button class="btn ghost" id="toShop">去商店看看</button></div></div>`;
+  const s=quiz.subj, ls=quiz.lesson;
+  $('#again').onclick=()=>startQuiz(s,null,ls); $('#home').onclick=()=>{quiz=null; render();}; $('#toShop').onclick=()=>{quiz=null; tab='shop'; render();};
+}
+function renderReview(p){
+  const groups=subjectsOf(S).map(k=>({k, qs:bankOf(S,k).filter(q=>S.missed.includes(qid(k,q)))})).filter(g=>g.qs.length);
+  p.innerHTML=`<h2>錯題本</h2><p class="sub">答錯的題目會收在這裡，重新答對就會拿掉，還能拿回經驗值。</p>
+  ${groups.length?groups.map(g=>{const s=SUBJECTS[g.k];return `<div class="revgroup" style="--c:${s.c}"><div class="qhead"><h3>${s.name}・${g.qs.length} 題</h3><button class="btn hot" data-rev="${g.k}">練這 ${Math.min(5,g.qs.length)} 題</button></div><ul>${g.qs.map(q=>`<li><span class="pill">${lessonNo(q.l)}・${q.u.replace(/^(陷阱|融會貫通)：/,'')}</span> ${q.q}</li>`).join('')}</ul></div>`;}).join('')
+  :`<div class="empty">${av(charSVG(S))}<p>錯題本是空的，答錯的題目會出現在這裡。</p></div>`}`;
+  p.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ const g=groups.find(x=>x.k===b.dataset.rev); startQuiz(g.k, shuffle(g.qs).slice(0,5)); });
+}
+
+/* ---- 衣櫥與商店 ---- */
+function previewWear(it){ const w={}; w[it.slot]=it.id; return animalSVG(S.animal,S.fur,w,{bg:it.slot==='bg'}); }
+function itemCard(it,mode){
+  const owned=S.owned.includes(it.id), on=S.wear[it.slot]===it.id;
+  const tag=it.season?`<span class="season">${SEASONS[it.season].name}限定</span>`:it.reward?`<span class="season reward">成就獎勵</span>`:'';
+  let btn='', note='';
+  if(mode==='closet'){ btn=`<button class="btn ${on?'ghost':'hot'}" data-wear="${it.id}">${on?(it.slot==='bg'?'使用中':'脫下'):(it.slot==='bg'?'使用':'穿上')}</button>`; note=it.price===0?'免費':it.reward?'用成就換來的':'用努力換來的'; }
+  else if(it.reward){ const m=MEDALS.find(x=>x.reward&&(x.reward.item===it.id||x.reward.item2===it.id)); note='破成就「'+m.name+'」才能得到'; btn=owned?`<button class="btn ghost" data-wear="${it.id}">已擁有・${on?'使用中':'穿上'}</button>`:`<span class="lock">${m.desc}</span>`; }
+  else { const c=canBuy(it);
+    note=it.season?(seasonOpen(it.season)?'節日期間限定販售':'節日還沒到'):it.medal?'需要勳章：'+MEDALS.find(m=>m.id===it.medal).name:it.medalCount?`需要 ${it.medalCount} 枚勳章`:it.rank?`需要等級「${LEVELS[it.rank].name}」`:'只要金幣就能換';
+    btn=owned?`<button class="btn ghost" data-wear="${it.id}">已擁有・${on?'使用中':'穿上'}</button>`:`<button class="btn hot" data-buy="${it.id}" ${c.ok?'':'disabled'}>${it.price} 金幣兌換</button>${c.ok?'':`<span class="lock">${c.why}</span>`}`; }
+  return `<div class="item ${on?'on':''}">${tag}<span class="slotname">${SLOT_NAME[it.slot]}</span>${av(previewWear(it))}<h4>${it.name}</h4><small>${note}</small>${btn}</div>`;
+}
+function bindItems(p){
+  p.querySelectorAll('[data-wear]').forEach(b=>b.onclick=()=>{ const it=ITEMS.find(x=>x.id===b.dataset.wear);
+    if(it.slot==='bg') S.wear.bg=it.id; else S.wear[it.slot]=S.wear[it.slot]===it.id?null:it.id; save(); render(); poke(document.querySelector('#sideBody .av')); });
+  p.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ const it=ITEMS.find(x=>x.id===b.dataset.buy); if(!canBuy(it).ok) return;
+    S.coins-=it.price; S.owned.push(it.id); S.wear[it.slot]=it.id; save(); render(); poke(document.querySelector('#sideBody .av')); toast('換到「'+it.name+'」了，已經幫你換上！'); });
+}
+function renderShop(p){
+  const all=ITEMS.filter(it=>it.price>0);
+  const seasonal=Object.keys(SEASONS).map(id=>{ const list=all.filter(i=>i.season===id); const open=seasonOpen(id), s=SEASONS[id];
+    return [open,`<div class="section-t">${s.name}限定 ${open?`<span class="season">販售中・到 ${s.to[0]}/${s.to[1]}</span>`:`<span class="season off">${s.from[0]}/${s.from[1]} 開放</span>`}</div><div class="grid">${list.map(it=>itemCard(it,'shop')).join('')}</div>`]; }).sort((a,b)=>b[0]-a[0]).map(x=>x[1]).join('');
+  p.innerHTML=`<h2>商店</h2><p class="sub">你有 <b>${S.coins}</b> 金幣、<b>${S.medals.length}</b> 枚勳章。節日裝扮只在節日期間販售，買了就能一直穿。</p>
+  ${seasonal}
+  <div class="section-t">金幣就能換</div><div class="grid">${all.filter(i=>!i.season&&!i.medal&&!i.medalCount&&!i.rank).map(it=>itemCard(it,'shop')).join('')}</div>
+  <div class="section-t">勳章、等級限定</div><div class="grid">${all.filter(i=>!i.season&&(i.medal||i.medalCount||i.rank)).map(it=>itemCard(it,'shop')).join('')}</div>
+  <div class="section-t">成就特殊道具（買不到，只能破成就）</div><div class="grid">${ITEMS.filter(i=>i.reward).map(it=>itemCard(it,'shop')).join('')}</div>`;
+  bindItems(p);
+}
+function renderMedals(p){
+  p.innerHTML=`<h2>勳章牆</h2><p class="sub">已收集 ${S.medals.length} / ${MEDALS.length} 枚。連續練習 ${streak(S)} 天，總共練習 ${S.days.length} 天、${Math.floor(S.seconds/60)} 分鐘。</p>
+  <div class="medals">${MEDALS.filter(m=>m.id==='life'?subjectsOf(S).includes('life')||S.medals.includes('life'):true).map(m=>`<div class="medal ${S.medals.includes(m.id)?'':'off'}"><span class="m">${m.short}</span><div><h4>${m.name}</h4><p>${m.desc}</p>${m.reward?`<p class="rw">獎勵：${rewardText(m.reward)}</p>`:''}</div></div>`).join('')}</div>
+  <div class="section-t">偶像等級</div>
+  <div class="levels">${LEVELS.map((lv,i)=>`<div class="lvrow ${i<=levelOf(S)?'done':''}"><b>${lv.name}</b><span>${Object.keys(lv.req).length?Object.entries(lv.req).map(([key,v])=>REQ_LABEL[key](v)).join('・'):'起點'}</span></div>`).join('')}</div>`;
+}
+
+/* ================= 開始 ================= */
+function boot(){
+  render();
+  if(CFG.url){ pullCloud().then(()=>{ if(!S) tab='who'; render(); }); }
+}
+window.addEventListener('pagehide',()=>{ if(CFG.url) pushNow(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && CFG.url) pushNow(); });
+
+// 每次打開都抓最新的題庫檔，避免平板用到舊題目
+(function(){ var s=document.createElement('script'); s.src='questions.js?t='+Date.now(); s.onload=s.onerror=boot; document.head.appendChild(s); })();
+</script>
+</body>
+</html>
