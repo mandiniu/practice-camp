@@ -39,6 +39,7 @@ h2{font-size:1.3rem}
 .kidtab .cnt{font-family:var(--display);background:var(--sun);color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.9rem}
 .kidtab .face{width:30px;height:30px}
 .pbtn{border:2px dashed var(--grape);background:transparent;color:var(--grape);border-radius:999px;padding:8px 16px;font-weight:700}
+.pbtn.back{text-decoration:none;border-style:solid;border-color:var(--line);color:var(--ink);background:var(--card)}
 .pbtn.on{border-style:solid;background:var(--grape);color:#fff}
 .banner{border-radius:16px;padding:10px 14px;font-size:.92rem;background:var(--sun-soft);border:2px solid #F5DD8A}
 .banner.err{background:var(--pink-soft);border-color:#FFB3D0}
@@ -171,6 +172,7 @@ label.lbl{font-weight:700;font-size:.92rem}
   <header class="top">
     <div class="brand"><svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true"><use href="#stk0"/></svg><div><h1>生活習慣貼紙本</h1><small>小學生練習營</small></div></div>
     <nav class="kids" id="kids" aria-label="選擇小朋友"></nav>
+    <a class="pbtn back" id="back" href="./" hidden>← 回練習營</a>
     <button class="pbtn" id="pbtn">家長模式</button>
   </header>
   <div id="banner"></div>
@@ -497,6 +499,7 @@ function render(){
   if(mode==='parent') renderParent(); else renderKid();
 }
 function renderBanner(){
+  $('#back').hidden=demo;
   const b=$('#banner'); let h='';
   if(demo) h=`<div class="banner"><b>示範模式：</b>畫面上是範例資料，重新整理就會回到原樣。在練習營平板網站上打開時，會自動使用你的 Google 試算表。家長密碼示範用 0000。</div>`;
   else if(loadErr && ST) h=`<div class="banner err">${esc(loadErr)}（畫面是上一次讀到的資料）</div>`;
