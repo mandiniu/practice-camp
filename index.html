@@ -2,7 +2,14 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="練習營">
+<meta name="theme-color" content="#F7F0FF">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
 <title>小學生練習營</title>
@@ -273,6 +280,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .reqs em,.examscope em,.examscope .pill,.stat span,.lmeta .lock,.chip{white-space:nowrap}
 .reqs li{grid-template-columns:18px minmax(0,1fr) auto}
 .examscope li{grid-template-columns:auto minmax(0,1fr) auto}
+/* 練習時間 */
+.timebox{margin-top:8px;background:var(--soft);border-radius:12px;padding:8px 12px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.timebox .tl{font-size:.82rem;color:var(--muted);margin-right:6px}
+.timebox b{font-family:var(--display);font-variant-numeric:tabular-nums}
+.timebox .tsub{display:flex;gap:12px;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.timebox .tsub b{color:var(--ink)}
 </style>
 
 <div class="wrap">
@@ -1511,7 +1524,7 @@ const KEY='practice-camp-v5', CFG_KEY='practice-camp-cloud';
 function newKid(name,grade,sem){
   return {id:'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), name, grade, sem, coins:0, xp:0, days:[],
     correct:{chinese:0,math:0,science:0,social:0,life:0}, rounds:{chinese:0,math:0,science:0,social:0,life:0},
-    perfects:0, seconds:0, medals:[], mastered:[], missed:[], wrong:{}, stats:{trap:0,deep:0,fixed:0,ext:0,gift:0}, perf:{}, gifted:[],
+    perfects:0, seconds:0, daySec:{}, medals:[], mastered:[], missed:[], wrong:{}, stats:{trap:0,deep:0,fixed:0,ext:0,gift:0}, perf:{}, gifted:[],
     animal:'cat', fur:'orange', wings:'none', animals:[], wingsOwned:[], owned:FREE_ITEMS.slice(),
     wear:{head:'starclip',face:null,neck:null,body:'tee',back:null,hand:null,bg:'meadow'}, setup:false, updated:0};
 }
@@ -1616,6 +1629,12 @@ function progressBox(){
   const pct=Math.min(100,Math.max(0,(S.xp-(LEVELS[i].req.xp||0))/(nx.req.xp-(LEVELS[i].req.xp||0))*100));
   return `<div class="rank"><b>${LEVELS[i].name}</b><p>升級到「${nx.name}」要同時達成：</p><div class="meter"><i style="width:${pct}%"></i></div><ul class="reqs">${items}</ul></div>`;
 }
+/* ---- 練習時間：只計算真正在答題的時間（畫面在前景時） ---- */
+function fmtDur(sec){ sec=Math.max(0,Math.floor(sec||0)); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60); if(h) return h+' 小時'+(m?' '+m+' 分':''); if(m) return m+' 分鐘'; return sec?'不到 1 分鐘':'0 分鐘'; }
+function addDaySec(k){ k.daySec=k.daySec||{}; const t=today(); k.daySec[t]=(k.daySec[t]||0)+1; const keys=Object.keys(k.daySec); if(keys.length>120){ keys.sort().slice(0,keys.length-120).forEach(d=>delete k.daySec[d]); } }
+function secSince(k,days){ const d=k.daySec||{}; let s=0; for(let i=0;i<days;i++){ const x=new Date(); x.setDate(x.getDate()-i); s+=d[today(x)]||0; } return s; }
+function timeHTML(k){ return `<div class="timebox" id="timeBox"><div><span class="tl">⏱ 累積練習</span><b>${fmtDur(k.seconds)}</b></div><div class="tsub"><span>今天 <b>${fmtDur(secSince(k,1))}</b></span><span>最近 7 天 <b>${fmtDur(secSince(k,7))}</b></span></div></div>`; }
+function renderTime(){ const el=document.getElementById('timeBox'); if(el&&S) el.outerHTML=timeHTML(S); }
 function renderSide(){
   const side=$('#sideBody');
   if(!S){ side.innerHTML=`<div class="stage full">${av(animalSVG('cat','orange',{bg:'meadow',head:'starclip',body:'tee'},{bg:true}),'idle')}</div><p class="sub" style="margin-top:12px">先在右邊建立營員檔案，每位小朋友會有自己的角色、金幣和勳章。</p>`; return; }
@@ -1623,6 +1642,7 @@ function renderSide(){
     <div class="who"><b class="kidname">${esc(S.name)}</b><button class="chip" id="editKid" title="修改年級">${termLabel(S)} ✎</button></div>
     ${progressBox()}
     <div class="stats"><div class="stat coin"><b>${S.coins}</b><span>金幣</span></div><div class="stat"><b>${S.xp}</b><span>經驗值</span></div><div class="stat"><b>${S.medals.length}</b><span>勳章</span></div></div>
+    ${timeHTML(S)}
     <div class="actions" style="justify-content:stretch"><button class="btn ghost" style="flex:1" id="switchKid">換人練習</button></div>`;
   $('#switchKid').onclick=()=>{ stopQuiz(); tab='who'; render(); };
   $('#editKid').onclick=()=>{ stopQuiz(); tab='profile'; render(); };
@@ -1810,7 +1830,7 @@ function startQuiz(subj, onlyQs, lesson, mode){
     if(q.parts){ c.parts=q.parts.map(pt=>{ if(!pt.o||pt.keep) return pt; const ord=shuffle(pt.o.map((_,j)=>j)); return {...pt, o:ord.map(j=>pt.o[j]), a:ord.indexOf(pt.a)}; }); c.mp=c.parts.map(()=>null); }
     return c; };
   quiz={subj, mode, qs:qs0.map(prep), lesson, i:0, results:[], picked:null, earned:0, xp:0, fresh:0, last:null};
-  clearInterval(tick); tick=setInterval(()=>{ if(document.visibilityState==='visible'){ S.seconds++; if(S.seconds%30===0){ save(); checkMedals(); } } },1000);
+  clearInterval(tick); tick=setInterval(()=>{ if(document.visibilityState==='visible'){ S.seconds++; addDaySec(S); if(quiz) quiz.sec=(quiz.sec||0)+1; if(S.seconds%30===0){ save(); checkMedals(); renderTime(); } } },1000);
   tab='learn'; render();
 }
 function stopQuiz(){ clearInterval(tick); tick=null; quiz=null; if(S) save(); }
@@ -1888,7 +1908,7 @@ function renderResult(p){
   const weak=[...new Set(quiz.qs.filter((q,i)=>!quiz.results[i]).map(q=>SUBJECTS[q.subj].name+lessonNo(q.l)))];
   p.innerHTML=`<div class="result">${av(charSVG(S),'bounce')}<h2>${right===n?'全部答對，太厲害了！':right>=n/2?'做得很好！':'有進步空間，再試一次吧！'}</h2><div class="big">${quiz.exam?Math.round(right/n*100)+' 分':right+' / '+n}</div>
   ${quiz.exam?`<p class="sub">${quiz.exam}模擬考：答對 ${right} / ${n} 題。${weak.length?'要再加強：'+weak.join('、')+'。答錯的題目已經放進錯題本。':'全部答對，準備得很好！'}</p>`:''}
-  <p class="sub">這回合拿到 ${quiz.earned} 金幣、${quiz.xp} 經驗值${right===n&&n>=5?'（含全對加碼）':''}。</p>
+  <p class="sub">這回合練習了 ${fmtDur(quiz.sec||0)}，拿到 ${quiz.earned} 金幣、${quiz.xp} 經驗值${right===n&&n>=5?'（含全對加碼）':''}。今天累積練習 ${fmtDur(secSince(S,1))}。</p>
   <div class="actions" style="justify-content:center"><button class="btn hot" id="again">${quiz.review?'回錯題本':'再玩一回合'}</button><button class="btn ghost" id="home">回練習場</button><button class="btn ghost" id="toShop">去商店看看</button></div></div>`;
   const s=quiz.subj, ls=quiz.lesson, md=quiz.mode, ex=quiz.examObj;
   const rv=quiz.review; $('#again').onclick=()=>rv?(quiz=null,tab='review',render()):ex?startExam(ex):startQuiz(s,null,ls,md); $('#home').onclick=()=>{quiz=null; render();}; $('#toShop').onclick=()=>{quiz=null; tab='shop'; render();};
@@ -2016,7 +2036,7 @@ function renderShop(p){
   bindItems(p);
 }
 function renderMedals(p){
-  p.innerHTML=`<h2>勳章牆</h2><p class="sub">已收集 ${S.medals.length} / ${MEDALS.length} 枚。連續練習 ${streak(S)} 天，總共練習 ${S.days.length} 天、${Math.floor(S.seconds/60)} 分鐘。</p>
+  p.innerHTML=`<h2>勳章牆</h2><p class="sub">已收集 ${S.medals.length} / ${MEDALS.length} 枚。連續練習 ${streak(S)} 天，總共練習 ${S.days.length} 天、${fmtDur(S.seconds)}。</p>
   <div class="medals">${MEDALS.filter(m=>m.id==='life'?subjectsOf(S).includes('life')||S.medals.includes('life'):true).map(m=>`<div class="medal ${S.medals.includes(m.id)?'':'off'}"><span class="m">${m.short}</span><div><h4>${m.name}</h4><p>${m.desc}</p>${m.reward?`<p class="rw">獎勵：${rewardText(m.reward)}</p>`:''}</div></div>`).join('')}</div>
   <div class="section-t">偶像等級</div>
   <div class="levels">${LEVELS.map((lv,i)=>`<div class="lvrow ${i<=levelOf(S)?'done':''}"><b>${lv.name}</b><span>${Object.keys(lv.req).length?Object.entries(lv.req).map(([key,v])=>REQ_LABEL[key](v)).join('・'):'起點'}</span></div>`).join('')}</div>`;
@@ -2033,6 +2053,16 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 boot();
 </script>
 
+
+<!-- 生活習慣貼紙本入口（habits.html 放在同一個資料夾） -->
+<style>body{padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))!important}</style>
+<a href="habits.html" id="habitsEntry" aria-label="打開生活習慣貼紙本"
+   style="position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;
+          display:flex;align-items:center;gap:8px;padding:10px 18px 10px 10px;border-radius:999px;text-decoration:none;
+          background:#FF4F96;color:#fff;font-weight:700;font-size:16px;box-shadow:0 4px 0 #C92C6E,0 10px 24px -10px rgba(43,35,80,.5)">
+  <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#fff"/><circle cx="24" cy="24" r="19.5" fill="#FFF1B8"/><polygon points="24.0,11.5 27.3,20.0 36.4,20.5 29.3,26.2 31.6,35.0 24.0,30.1 16.4,35.0 18.7,26.2 11.6,20.5 20.7,20.0" fill="#FFC22E" stroke="#E29A00" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  生活習慣貼紙
+</a>
 
 </body>
 </html>
